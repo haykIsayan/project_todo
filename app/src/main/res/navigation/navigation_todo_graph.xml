@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools" android:id="@+id/navigation_todo_graph"
+            app:startDestination="@id/destination_todos">
+
+    <fragment android:id="@+id/destination_todos" android:name="com.example.project_todo.view.fragments.TodosFragment"
+              android:label="todos_fragment" tools:layout="@layout/todos_fragment"/>
+    <fragment android:id="@+id/searchFragment" android:name="com.example.project_todo.view.fragments.SearchFragment"
+              android:label="search_fragment" tools:layout="@layout/search_fragment"/>
+</navigation>

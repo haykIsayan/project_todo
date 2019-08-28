@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+            android:id="@+id/save_todo"
+            android:title="Save Todo"
+            app:showAsAction="always"
+            android:icon="@drawable/ic_action_completed"/>
+
+    <item
+            android:id="@+id/add_photo"
+            android:title="Add Photo"
+            app:showAsAction="always"
+            android:icon="@drawable/ic_action_photo"/>
+
+    <item
+            android:id="@+id/add_reminder"
+            android:title="Add Reminder"
+            app:showAsAction="always"
+            android:icon="@drawable/ic_action_reminder"/>
+
+
+    <item
+            android:id="@+id/add_voice"
+            android:title="Add Voice"
+            app:showAsAction="always"
+            android:icon="@drawable/ic_action_voice"/>
+
+</menu>
