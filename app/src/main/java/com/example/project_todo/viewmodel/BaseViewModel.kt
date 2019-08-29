@@ -20,4 +20,7 @@ abstract class BaseViewModel<S>(application: Application): AndroidViewModel(appl
             }
         }
     }
+
+    fun invokeUseCase(useCase: LiveUseCase<S>): LiveData<Resource<S>>
+            = useCase.execute()
 }

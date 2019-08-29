@@ -8,7 +8,7 @@ class TodoDataCore: TodoRepository {
         return 1L
     }
 
-    override suspend fun getTodosByDate(date: String): List<Todo> {
+    override suspend fun getTodosByListTitle(date: String): List<Todo> {
         return  TodoTempDatabase.getTodos()
     }
 }

@@ -7,7 +7,7 @@ import com.example.project_todo.entity.Resource
 import com.example.project_todo.entity.Todo
 
 class GetTodosInteractor(
-    private val date: String,
+    private val parentListTitle: String,
     private val todoRepository: TodoRepository): TodoInteractor<List<Todo>>() {
 
     override suspend fun onExecute(): Resource<List<Todo>> {
@@ -16,7 +16,7 @@ class GetTodosInteractor(
     }
 
     private suspend fun getTodos(): Resource<List<Todo>> {
-        todoRepository.getTodosByDate(date).apply {
+        todoRepository.getTodosByListTitle(parentListTitle).apply {
             return if (isEmpty()) { NoTodos() }
             else { Resource.Success(this)}
         }

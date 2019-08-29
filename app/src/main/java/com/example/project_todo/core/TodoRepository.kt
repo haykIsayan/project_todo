@@ -4,5 +4,5 @@ import com.example.project_todo.entity.Todo
 
 interface TodoRepository {
     suspend fun saveTodo(todo: Todo): Long
-    suspend fun getTodosByDate(date: String): List<Todo>
+    suspend fun getTodosByListTitle(date: String): List<Todo>
 }
