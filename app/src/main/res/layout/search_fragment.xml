@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<LinearLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         tools:context=".view.fragments.SearchFragment">
 
-    <TextView
+    <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+            android:id="@+id/actv_search_bar_search_fragment"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="Hello"/>
+            android:layout_height="60dp"
+            android:inputType="textAutoComplete"/>
 
-</FrameLayout>
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_todos_search_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+</LinearLayout>

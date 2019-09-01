@@ -3,6 +3,10 @@ package com.example.project_todo.core
 import com.example.project_todo.entity.Todo
 
 class TodoDataCore: TodoRepository {
+    override suspend fun updateTodo(todo: Todo) {
+
+    }
+
     override suspend fun saveTodo(todo: Todo): Long {
         TodoTempDatabase.addTodo(todo)
         return 1L

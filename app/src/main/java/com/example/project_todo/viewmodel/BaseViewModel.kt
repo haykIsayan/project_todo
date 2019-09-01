@@ -9,7 +9,7 @@ import com.example.project_todo.entity.Resource
 
 abstract class BaseViewModel<S>(application: Application): AndroidViewModel(application) {
 
-    fun invokeUseCase(useCase: LiveUseCase<S>, mediatorLiveData: MediatorLiveData<Resource<S>>) {
+    fun <D> invokeUseCase(useCase: LiveUseCase<D>, mediatorLiveData: MediatorLiveData<Resource<D>>) {
         val useCaseData = useCase.execute()
         mediatorLiveData.apply {
             addSource(useCaseData) {

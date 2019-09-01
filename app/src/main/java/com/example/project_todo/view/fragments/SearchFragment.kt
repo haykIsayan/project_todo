@@ -12,9 +12,6 @@ import com.example.project_todo.viewmodel.SearchViewModel
 
 class SearchFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = SearchFragment()
-    }
 
     private lateinit var viewModel: SearchViewModel
 

@@ -6,20 +6,18 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_todo.R
-import com.example.project_todo.TodoUtils
-import com.example.project_todo.entity.Error
-import com.example.project_todo.entity.NoTodos
-import com.example.project_todo.entity.Resource
-import com.example.project_todo.entity.Todo
+import com.example.project_todo.entity.*
 import com.example.project_todo.view.TodoAdapter
+import com.example.project_todo.view.customviews.EmptyStateView
+import com.example.project_todo.view.customviews.TodoFilterView
 import com.example.project_todo.viewmodel.MainViewModel
 import com.example.project_todo.viewmodel.TodosViewModel
-import com.google.android.material.tabs.TabLayout
 
 
 class TodosFragment : Fragment() {
@@ -27,8 +25,11 @@ class TodosFragment : Fragment() {
     private lateinit var mMainViewModel: MainViewModel
     private lateinit var mTodosViewModel: TodosViewModel
 
-    private lateinit var rvTodoList: RecyclerView
+    private lateinit var tfvTodoFilter: TodoFilterView
 
+    private lateinit var esvEmptyState: EmptyStateView
+
+    private lateinit var rvTodoList: RecyclerView
     private lateinit var mTodoAdapter: TodoAdapter
 
     override fun onCreateView(
@@ -40,6 +41,10 @@ class TodosFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        tfvTodoFilter = view.findViewById(R.id.tfv_todo_filter_todo_fragment)
+        esvEmptyState = view.findViewById(R.id.esv_empty_state_todos_fragment)
+        tfvTodoFilter.setOnTodoFiltered(this::filterTodos)
+        tfvTodoFilter.setOnDateSelected(this::onDateSelected)
         initRecyclerView(view)
     }
 
@@ -48,13 +53,11 @@ class TodosFragment : Fragment() {
         mMainViewModel = ViewModelProviders.of(activity!!).get(MainViewModel::class.java)
         mTodosViewModel = ViewModelProviders.of(this).get(TodosViewModel::class.java)
 
-        mMainViewModel.getListTitleData().observe(viewLifecycleOwner, Observer {
-            mTodosViewModel.getAllTodos(it)
-        })
+        mMainViewModel.getListTitleData().observe(viewLifecycleOwner, Observer { mTodosViewModel.fetchAllTodos(it) })
 
-        mTodosViewModel.getAllTodosData().observe(viewLifecycleOwner, Observer {
-            displayTodos(it)
-        })
+        mTodosViewModel.getAllTodosData().observe(viewLifecycleOwner, Observer { onTodoDataObtained(it) })
+        mTodosViewModel.getFilteredTodosData().observe(viewLifecycleOwner, Observer { onTodoDataObtained(it) })
+        mTodosViewModel.getCompleteEvent().observe(viewLifecycleOwner, Observer { updateCompletedTodo(it) })
     }
 
     private fun initRecyclerView(view: View) {
@@ -65,16 +68,61 @@ class TodosFragment : Fragment() {
         rvTodoList.addItemDecoration(DividerItemDecoration(context, RecyclerView.VERTICAL))
     }
 
-    private fun completeTodo(todo: Todo) {
-        // todo complete todo
+    private fun onDateSelected() {
+        // TODO
     }
 
-    private fun displayTodos(resource: Resource<List<Todo>>?) {
+    private fun filterTodos(todoFilter: Todo.TodoFilter) {
+        mTodosViewModel.filterTodos(todoFilter)
+        mTodosViewModel.mCurrentFilter = todoFilter
+    }
+
+    private fun completeTodo(todo: Todo, position: Int) {
+
+        AlertDialog.Builder(context!!)
+            .setMessage("Complete Task?")
+            .setPositiveButton("Complete") { _, _ ->
+                mTodosViewModel.completeTodo(todo, position)
+            }
+            .setNegativeButton("Cancel") { _, _ ->
+                mTodoAdapter.notifyItemChanged(position)
+            }
+            .create()
+            .show()
+    }
+
+    private fun updateCompletedTodo(resource: Resource<Int>) {
+        resource.apply {
+            when (this) {
+                is Resource.Success ->  mTodoAdapter.updateCompletedTodo(successData, mTodosViewModel.mCurrentFilter) }
+        }
+    }
+
+    private fun onTodoDataObtained(resource: Resource<List<Todo>>?) {
         when (resource) {
-            is Resource.Success -> {
-                rvTodoList.visibility = View.VISIBLE
-                mTodoAdapter.setTodoList(resource.successData)
+            is Resource.Success -> displayTodos(resource.successData)
+            is AllCompleted -> displayAllCompletedEmptyState()
+            is NoCompleted -> displayNoCompletedEmptyState()
+            is Error -> {
+                // handel errors via MainViewModel
             }
         }
     }
+
+    private fun displayTodos(list: List<Todo>) {
+        rvTodoList.visibility = View.VISIBLE
+        esvEmptyState.visibility = View.GONE
+        mTodoAdapter.setTodoList(list)
+    }
+
+    private fun displayAllCompletedEmptyState() {
+        rvTodoList.visibility = View.GONE
+        esvEmptyState.visibility = View.VISIBLE
+        esvEmptyState.invokeAllCompletedMode()
+    }
+
+    private fun displayNoCompletedEmptyState() {
+        rvTodoList.visibility = View.GONE
+    }
+
 }

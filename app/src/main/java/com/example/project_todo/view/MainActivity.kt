@@ -23,10 +23,6 @@ class MainActivity : AppCompatActivity() {
 
         ncNavController = Navigation.findNavController(this, R.id.nav_host_fragment)
 
-        if (savedInstanceState == null) {
-            ncNavController.navigate(R.id.destination_todos)
-        }
-
         mMainViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
         mMainViewModel.setListTitle(TodoUtils.Constants.TEST_LIST_TITLE)
     }
