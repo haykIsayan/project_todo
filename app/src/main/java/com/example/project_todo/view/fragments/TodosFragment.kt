@@ -29,6 +29,8 @@ class TodosFragment : Fragment() {
 
     private lateinit var esvEmptyState: EmptyStateView
 
+    private var mCompleteDialog: AlertDialog? = null
+
     private lateinit var rvTodoList: RecyclerView
     private lateinit var mTodoAdapter: TodoAdapter
 
@@ -78,17 +80,24 @@ class TodosFragment : Fragment() {
     }
 
     private fun completeTodo(todo: Todo, position: Int) {
-
-        AlertDialog.Builder(context!!)
-            .setMessage("Complete Task?")
-            .setPositiveButton("Complete") { _, _ ->
-                mTodosViewModel.completeTodo(todo, position)
-            }
-            .setNegativeButton("Cancel") { _, _ ->
-                mTodoAdapter.notifyItemChanged(position)
-            }
-            .create()
-            .show()
+        mCompleteDialog?.apply {
+            show()
+            return
+        }
+        context?.apply {
+            mCompleteDialog = AlertDialog.Builder(this)
+                .setTitle(resources.getString(R.string.complete_dialog_title))
+                .setMessage(todo.text)
+                .setOnCancelListener { mTodoAdapter.notifyItemChanged(position) }
+                .setPositiveButton(resources.getString(R.string.complete_dialog_positive)) { _, _ ->
+                    mTodosViewModel.completeTodo(todo, position)
+                }
+                .setNegativeButton(resources.getString(R.string.complete_dialog_negative)) { _, _ ->
+                    mTodoAdapter.notifyItemChanged(position)
+                }
+                .create()
+            mCompleteDialog?.show()
+        }
     }
 
     private fun updateCompletedTodo(resource: Resource<Int>) {
@@ -103,9 +112,7 @@ class TodosFragment : Fragment() {
             is Resource.Success -> displayTodos(resource.successData)
             is AllCompleted -> displayAllCompletedEmptyState()
             is NoCompleted -> displayNoCompletedEmptyState()
-            is Error -> {
-                // handel errors via MainViewModel
-            }
+            is Error -> { mMainViewModel.sendError(resource.throwable)}
         }
     }
 

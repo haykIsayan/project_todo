@@ -20,6 +20,10 @@ class MainViewModel(application: Application): BaseViewModel<List<Todo>>(applica
         mListTitleData.value = parentListTitle
     }
 
+    fun sendError(throwable: Throwable) {
+        mErrorLiveData.value = throwable
+    }
+
     fun getListTitleData(): LiveData<String> = mListTitleData
     fun getErrorData(): LiveData<Throwable> = mErrorLiveData
 }
