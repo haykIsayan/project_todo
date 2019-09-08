@@ -1,22 +1,18 @@
-package com.example.project_todo.domain.tasks
+package com.example.project_todo.domain.tasks.storage
 
 import com.example.project_todo.core.TaskRepository
 import com.example.project_todo.domain.LiveInteractor
 import com.example.project_todo.entity.Error
 import com.example.project_todo.entity.Resource
 import com.example.project_todo.entity.Task
+import com.example.project_todo.entity.TaskCompleted
 
-class CompleteTodoInteractor(private val task: Task, private val updatePosition: Int,
+class CompleteTaskInteractor(private val task: Task, private val updatePosition: Int,
                              private val taskRepository: TaskRepository): LiveInteractor<Int>() {
 
     override suspend fun onExecute(): Resource<Int> {
-        return try {
-            task.isCompleted = true
-            taskRepository.updateTask(task)
-            Resource.Success(updatePosition)
-        } catch (throwable: Throwable) {
-            Error(throwable)
-        }
+        task.isCompleted = true
+        taskRepository.updateTask(task)
+        return TaskCompleted(task, updatePosition)
     }
-
 }

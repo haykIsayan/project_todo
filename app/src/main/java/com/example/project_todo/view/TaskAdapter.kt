@@ -9,38 +9,45 @@ import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 
 
-class TodoAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
+class TaskAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerView.Adapter<TaskAdapter.TodoViewHolder>() {
 
-    private val mTodoList = mutableListOf<Task>()
+    private val taskList = mutableListOf<Task>()
     
     fun setTodoList(taskList: List<Task>) {
-        mTodoList.clear()
-        mTodoList.addAll(taskList)
+        this.taskList.clear()
+        this.taskList.addAll(taskList)
         notifyDataSetChanged()
     }
 
-    fun addTask(task: Task) {
-        mTodoList.add(task)
+    fun getTask(position: Int) = taskList[position]
+
+    fun updateTaskSaved(task: Task) {
+        taskList.add(task)
         notifyItemInserted(itemCount)
     }
 
-    fun updateCompletedTodo(position: Int, currentFilter: Task.TaskFilter) =
+    fun updateTaskCompleted(position: Int, currentFilter: Task.TaskFilter) =
         if (currentFilter == Task.TaskFilter.TODO) {
-            mTodoList.removeAt(position)
+            taskList.removeAt(position)
             notifyItemRemoved(position)
         } else {
             notifyItemChanged(position)
         }
+
+    fun updateTaskDeleted(position: Int) {
+        taskList.removeAt(position)
+        notifyItemRemoved(position)
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoViewHolder {
         return TodoViewHolder(LayoutInflater.from(parent.context)
             .inflate(R.layout.layout_todo_preview, parent, false))
     }
 
-    override fun getItemCount(): Int = mTodoList.size
+    override fun getItemCount(): Int = taskList.size
 
     override fun onBindViewHolder(holder: TodoViewHolder, position: Int) {
-        holder.bind(mTodoList[position], position)
+        holder.bind(taskList[position], holder.adapterPosition)
     }
 
     inner class TodoViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -61,8 +68,8 @@ class TodoAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerV
                 mtvTodoText.paintFlags = Paint.LINEAR_TEXT_FLAG
             }
 
-            mcbComplete.setOnClickListener { onCheckBoxClicked(task, position) }
-            itemView.setOnLongClickListener { onCheckBoxClicked(task, position); true }
+            mcbComplete.setOnClickListener { onCheckBoxClicked(task, adapterPosition) }
+            itemView.setOnLongClickListener { onCheckBoxClicked(task, adapterPosition); true }
         }
     }
 }

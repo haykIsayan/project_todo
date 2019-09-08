@@ -1,4 +1,4 @@
-package com.example.project_todo.domain.tasks
+package com.example.project_todo.domain.tasks.filtering
 
 import com.example.project_todo.domain.LiveInteractor
 import com.example.project_todo.entity.Resource

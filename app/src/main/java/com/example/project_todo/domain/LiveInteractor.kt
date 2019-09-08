@@ -2,6 +2,7 @@ package com.example.project_todo.domain
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.project_todo.entity.Error
 import com.example.project_todo.entity.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -12,13 +13,15 @@ abstract class LiveInteractor<S>: LiveUseCase<S> {
 
     private val mInteractorData = MutableLiveData<Resource<S>>()
 
-    final override fun execute(): LiveData<Resource<S>> = mInteractorData.apply {
+    final override fun execute(): LiveData<Resource<S>> = MutableLiveData<Resource<S>>().apply {
         value = Resource.Pending("")
-        val asyncAction = GlobalScope.async(Dispatchers.IO) { onExecute() }
+        val asyncAction = GlobalScope.async(Dispatchers.IO) { obtainResource()}
         GlobalScope.launch(Dispatchers.Main) { value = asyncAction.await() }
     }
 
-    suspend fun test(): LiveData<Resource<S>> = mInteractorData.apply { value = onExecute() }
+    private suspend fun obtainResource() = try { onExecute() } catch (throwable: Throwable) { Error(throwable) }
+
+    suspend fun test(): LiveData<Resource<S>> = MutableLiveData<Resource<S>>().apply { value = onExecute() }
 
     abstract suspend fun onExecute(): Resource<S>
 }

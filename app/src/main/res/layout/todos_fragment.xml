@@ -7,6 +7,12 @@
         android:orientation="vertical"
         tools:context=".view.fragments.TasksFragment">
 
+    <SeekBar
+            android:id="@+id/sb_task_progress_task_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:thumb="@null"/>
+
     <com.example.project_todo.view.customviews.TodoFilterView
             android:id="@+id/tfv_todo_filter_todo_fragment"
             android:layout_width="match_parent"

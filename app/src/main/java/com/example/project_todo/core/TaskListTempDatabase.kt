@@ -9,6 +9,12 @@ object TaskListTempDatabase {
 
     fun getTaskLists(): List<TaskList> = sTaskLists
 
+    fun updateTaskList(taskList: TaskList) {
+        sTaskLists.apply {
+            set(indexOf(taskList), taskList)
+        }
+    }
+
     fun addTaskList(taskList: TaskList) {
         sTaskLists.add(taskList)
     }

@@ -6,4 +6,5 @@ interface TaskRepository {
     suspend fun saveTask(task: Task): Long
     suspend fun getTasksByListTitle(date: String): List<Task>
     suspend fun updateTask(task: Task)
+    suspend fun deleteTask(task: Task)
 }

@@ -7,7 +7,6 @@ import androidx.lifecycle.Observer
 import com.example.project_todo.R
 import com.example.project_todo.entity.Error
 import com.example.project_todo.entity.Resource
-import com.example.project_todo.entity.Task
 import com.example.project_todo.entity.TaskList
 import com.example.project_todo.initAddTaskDialog
 import com.example.project_todo.viewmodel.MainViewModel
@@ -33,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         mainToolBar.setNavigationOnClickListener { }
 
         mainViewModel.getTaskListsData().observe(this, Observer {
-            it.doOnChanged(::onTaskListsObtained, ::onPending, ::onFailure)
+            it.inspect(::onTaskListsObtained, ::onPending, ::onFailure, ::onError)
         })
 
         mainViewModel.getAddTaskLiveEvent().observe(this, Observer { onTaskSaved() })
