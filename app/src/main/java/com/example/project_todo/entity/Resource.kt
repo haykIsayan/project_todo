@@ -8,4 +8,14 @@ sealed class Resource<out S> {
 
     abstract class Failure: Resource<Nothing>()
 
+    fun doOnChanged(
+        onSuccess: (S) -> Unit,
+        onPending: (String) -> Unit,
+        onFailure: (Failure) -> Unit) {
+        when (this) {
+            is Success -> onSuccess(successData)
+            is Pending -> onPending(pendingMessage)
+            is Failure -> onFailure(this)
+        }
+    }
 }

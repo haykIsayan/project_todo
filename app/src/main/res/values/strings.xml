@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">The Completionist</string>
+    <string name="app_name">Completionist</string>
     <string name="complete_dialog_title">Complete Task?</string>
     <string name="complete_dialog_positive">Complete</string>
     <string name="complete_dialog_negative">Cancel</string>

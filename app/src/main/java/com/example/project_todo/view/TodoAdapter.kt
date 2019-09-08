@@ -4,23 +4,28 @@ import android.graphics.Paint
 import android.view.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_todo.R
-import com.example.project_todo.entity.Todo
+import com.example.project_todo.entity.Task
 import com.google.android.material.checkbox.MaterialCheckBox
 import com.google.android.material.textview.MaterialTextView
 
 
-class TodoAdapter(private val onCheckBoxClicked: (Todo, Int) -> Unit): RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
+class TodoAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerView.Adapter<TodoAdapter.TodoViewHolder>() {
 
-    private val mTodoList = mutableListOf<Todo>()
+    private val mTodoList = mutableListOf<Task>()
     
-    fun setTodoList(todoList: List<Todo>) {
+    fun setTodoList(taskList: List<Task>) {
         mTodoList.clear()
-        mTodoList.addAll(todoList)
+        mTodoList.addAll(taskList)
         notifyDataSetChanged()
     }
 
-    fun updateCompletedTodo(position: Int, currentFilter: Todo.TodoFilter) =
-        if (currentFilter == Todo.TodoFilter.TODO) {
+    fun addTask(task: Task) {
+        mTodoList.add(task)
+        notifyItemInserted(itemCount)
+    }
+
+    fun updateCompletedTodo(position: Int, currentFilter: Task.TaskFilter) =
+        if (currentFilter == Task.TaskFilter.TODO) {
             mTodoList.removeAt(position)
             notifyItemRemoved(position)
         } else {
@@ -43,10 +48,10 @@ class TodoAdapter(private val onCheckBoxClicked: (Todo, Int) -> Unit): RecyclerV
         private val mcbComplete: MaterialCheckBox = itemView.findViewById(R.id.mcb_complete_layout_todo_preview)
         private val mtvTodoText: MaterialTextView = itemView.findViewById(R.id.mtv_todo_text_layout_todo_preview)
 
-        fun bind(todo: Todo, position: Int) {
-            mtvTodoText.text = todo.text
+        fun bind(task: Task, position: Int) {
+            mtvTodoText.text = task.text
 
-            if (todo.isCompleted) {
+            if (task.isCompleted) {
                 mcbComplete.isChecked = true
                 mcbComplete.isEnabled = false
                 mtvTodoText.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
@@ -56,8 +61,8 @@ class TodoAdapter(private val onCheckBoxClicked: (Todo, Int) -> Unit): RecyclerV
                 mtvTodoText.paintFlags = Paint.LINEAR_TEXT_FLAG
             }
 
-            mcbComplete.setOnClickListener { onCheckBoxClicked(todo, position) }
-            itemView.setOnLongClickListener { onCheckBoxClicked(todo, position); true }
+            mcbComplete.setOnClickListener { onCheckBoxClicked(task, position) }
+            itemView.setOnLongClickListener { onCheckBoxClicked(task, position); true }
         }
     }
 }

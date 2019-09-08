@@ -1,29 +1,56 @@
 package com.example.project_todo.viewmodel
 
-import android.app.Application
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import com.example.project_todo.TodoUtils
-import com.example.project_todo.core.TodoDataCore
-import com.example.project_todo.domain.GetTodosInteractor
+import com.example.project_todo.LiveEvent
+import com.example.project_todo.SingleLiveEvent
+import com.example.project_todo.core.TaskListRepository
+import com.example.project_todo.core.TaskRepository
+import com.example.project_todo.domain.tasklists.GetTaskListsInteractor
+import com.example.project_todo.domain.tasks.SaveTaskInteractor
 import com.example.project_todo.entity.Resource
-import com.example.project_todo.entity.Todo
-import java.util.*
+import com.example.project_todo.entity.Task
+import com.example.project_todo.entity.TaskList
 
-class MainViewModel(application: Application): BaseViewModel<List<Todo>>(application) {
+class MainViewModel(private val taskListRepository: TaskListRepository,
+                    private val taskRepository: TaskRepository): BaseViewModel<List<Task>>() {
 
-    private val mListTitleData = MutableLiveData<String>()
-    private val mErrorLiveData = MutableLiveData<Throwable>()
+    private val saveTaskEvent = LiveEvent<Resource<Task>>()
 
-    fun setListTitle(parentListTitle: String) {
-        mListTitleData.value = parentListTitle
+    private val allTaskListsData = MediatorLiveData<Resource<List<TaskList>>>()
+    private val currentTaskListData = MediatorLiveData<TaskList>()
+    private val errorLiveData = MediatorLiveData<Throwable>()
+
+    init {
+        fetchAllTaskLists()
+    }
+
+    private fun fetchAllTaskLists() {
+        invokeUseCase(GetTaskListsInteractor(taskListRepository), allTaskListsData)
+    }
+
+    fun setCurrentTaskList(taskList: TaskList) {
+        currentTaskListData.value = taskList
     }
 
     fun sendError(throwable: Throwable) {
-        mErrorLiveData.value = throwable
+        errorLiveData.value = throwable
     }
 
-    fun getListTitleData(): LiveData<String> = mListTitleData
-    fun getErrorData(): LiveData<Throwable> = mErrorLiveData
+    fun saveTask(text: String, dateString: String, subTasks: List<String>, priority: Int) {
+
+        currentTaskListData.value?.apply {
+            invokeUseCase(SaveTaskInteractor(
+                Task(text, title, dateString, false, subTasks, priority),
+                taskRepository), saveTaskEvent)
+        }
+    }
+
+    fun completeSaveTaskEvent() = saveTaskEvent.complete()
+
+    fun getAddTaskLiveEvent(): LiveData<Resource<Task>> = saveTaskEvent
+    fun getCurrentTaskListData(): LiveData<TaskList> = currentTaskListData
+    fun getTaskListsData(): LiveData<Resource<List<TaskList>>> = allTaskListsData
+    fun getErrorData(): LiveData<Throwable> = errorLiveData
+
 }

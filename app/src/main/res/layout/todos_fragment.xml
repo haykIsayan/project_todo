@@ -5,7 +5,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:context=".view.fragments.TodosFragment">
+        tools:context=".view.fragments.TasksFragment">
 
     <com.example.project_todo.view.customviews.TodoFilterView
             android:id="@+id/tfv_todo_filter_todo_fragment"

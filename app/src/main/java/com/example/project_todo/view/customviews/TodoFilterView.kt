@@ -5,7 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.HorizontalScrollView
 import com.example.project_todo.R
-import com.example.project_todo.entity.Todo
+import com.example.project_todo.entity.Task
 import com.google.android.material.button.MaterialButton
 
 class TodoFilterView(context: Context, attributeSet: AttributeSet): HorizontalScrollView(context, attributeSet) {
@@ -17,7 +17,7 @@ class TodoFilterView(context: Context, attributeSet: AttributeSet): HorizontalSc
 
     private var lastClickedButton: MaterialButton
 
-    private lateinit var onTodoFilterSelected: (Todo.TodoFilter) -> Unit
+    private lateinit var onTodoFilterSelected: (Task.TaskFilter) -> Unit
     private lateinit var onDateSelected: () -> Unit
 
     init {
@@ -31,13 +31,13 @@ class TodoFilterView(context: Context, attributeSet: AttributeSet): HorizontalSc
 
         lastClickedButton = mbAllTodos
 
-        mbAllTodos.setOnClickListener { onFilterClicked((it as MaterialButton), Todo.TodoFilter.ALL) }
-        mbTodos.setOnClickListener { onFilterClicked((it as MaterialButton), Todo.TodoFilter.TODO)  }
-        mbCompleted.setOnClickListener { onFilterClicked((it as MaterialButton), Todo.TodoFilter.COMPLETED)  }
+        mbAllTodos.setOnClickListener { onFilterClicked((it as MaterialButton), Task.TaskFilter.ALL) }
+        mbTodos.setOnClickListener { onFilterClicked((it as MaterialButton), Task.TaskFilter.TODO)  }
+        mbCompleted.setOnClickListener { onFilterClicked((it as MaterialButton), Task.TaskFilter.COMPLETED)  }
         mbSelectDate.setOnClickListener { onDateSelected() }
     }
 
-    private fun onFilterClicked(materialButton: MaterialButton, todoFilter: Todo.TodoFilter) {
+    private fun onFilterClicked(materialButton: MaterialButton, taskFilter: Task.TaskFilter) {
         lastClickedButton.apply {
             setTextColor(context.resources.getColor(R.color.colorPrimaryDark))
             setBackgroundColor(context.resources.getColor(R.color.colorPrimary))
@@ -47,10 +47,10 @@ class TodoFilterView(context: Context, attributeSet: AttributeSet): HorizontalSc
             setTextColor(context.resources.getColor(R.color.colorPrimary))
             setBackgroundColor(context.resources.getColor(R.color.colorPrimaryDark))
         }
-        onTodoFilterSelected(todoFilter)
+        onTodoFilterSelected(taskFilter)
     }
 
-    fun setOnTodoFiltered(onTodoFilterSelected: (Todo.TodoFilter) -> Unit) {
+    fun setOnTodoFiltered(onTodoFilterSelected: (Task.TaskFilter) -> Unit) {
         this.onTodoFilterSelected = onTodoFilterSelected
     }
 

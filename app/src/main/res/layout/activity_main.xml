@@ -9,27 +9,27 @@
         android:orientation="vertical"
         tools:context=".view.MainActivity">
 
+    <androidx.drawerlayout.widget.DrawerLayout
+            android:id="@+id/dl_list_selector_activity_main"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
     <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/mtl_toolbar_activity_main"
+            android:id="@+id/mtb_toolbar_activity_main"
             android:layout_width="match_parent"
             android:layout_height="?actionBarSize"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:navigationIcon="@drawable/ic_action_lists"
-            app:menu="@menu/menu_main_toolbar"
-            app:title="What to do"/>
+            app:menu="@menu/menu_main_toolbar"/>
 
     <fragment
             android:id="@+id/nav_host_fragment"
             android:name="androidx.navigation.fragment.NavHostFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintTop_toBottomOf="@+id/mtl_toolbar_activity_main"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="?actionBarSize"
             app:defaultNavHost="true"
             app:navGraph="@navigation/navigation_todo_graph" />
 

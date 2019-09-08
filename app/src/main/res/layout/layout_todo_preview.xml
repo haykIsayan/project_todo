@@ -8,7 +8,8 @@
             android:id="@+id/mcb_complete_layout_todo_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"/>
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="10dp"/>
 
     <com.google.android.material.textview.MaterialTextView
             android:id="@+id/mtv_todo_text_layout_todo_preview"
