@@ -26,8 +26,8 @@ class TaskAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerV
         notifyItemInserted(itemCount)
     }
 
-    fun updateTaskCompleted(position: Int, currentFilter: Task.TaskFilter) =
-        if (currentFilter == Task.TaskFilter.TODO) {
+    fun updateTaskCompleted(position: Int, currentCompletion: Task.TaskCompletion) =
+        if (currentCompletion == Task.TaskCompletion.TODO) {
             taskList.removeAt(position)
             notifyItemRemoved(position)
         } else {

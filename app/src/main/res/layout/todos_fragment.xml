@@ -13,7 +13,7 @@
             android:layout_height="wrap_content"
             android:thumb="@null"/>
 
-    <com.example.project_todo.view.customviews.TodoFilterView
+    <com.example.project_todo.view.customviews.TaskFilterView
             android:id="@+id/tfv_todo_filter_todo_fragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

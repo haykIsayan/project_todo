@@ -21,7 +21,4 @@ abstract class BaseViewModel<S>: ViewModel() {
             }
         }
     }
-
-    fun invokeUseCase(useCase: LiveUseCase<S>): LiveData<Resource<S>>
-            = useCase.execute()
 }

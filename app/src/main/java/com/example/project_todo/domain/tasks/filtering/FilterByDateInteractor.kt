@@ -10,7 +10,7 @@ class FilterByDateInteractor(private val taskList: List<Task>,
     override suspend fun onExecute(): Resource<List<Task>> {
         val filteredList = mutableListOf<Task>()
         for (task: Task in taskList) {
-            if (task.dateString == dateString) {
+            if (task.creationDate == dateString) {
                 filteredList.add(task)
             }
         }

@@ -21,6 +21,7 @@
                     app:rippleColor="@android:color/black"
                     android:text="All"
                     android:textSize="12sp"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/white"
                     android:backgroundTint="@android:color/black"
                     app:cornerRadius="15dp"
@@ -34,6 +35,7 @@
                     app:rippleColor="@android:color/black"
                     android:text="To Do"
                     android:textSize="12sp"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/black"
                     android:backgroundTint="@android:color/white"
                     app:cornerRadius="15dp"
@@ -46,9 +48,33 @@
                     android:layout_margin="5dp"
                     app:rippleColor="@android:color/black"
                     android:textSize="12sp"
+                    android:textAllCaps="false"
                     android:text="Completed"
                     android:textColor="@android:color/black"
                     app:cornerRadius="15dp"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="15dp"
+                    android:layout_marginBottom="15dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@android:color/darker_gray"/>
+
+            <com.google.android.material.button.MaterialButton
+                    android:id="@+id/mb_priority_layout_todo_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_margin="5dp"
+                    app:rippleColor="@android:color/black"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:text="All Priority"
+                    android:textColor="@android:color/black"
+                    app:cornerRadius="15dp"
+                    android:visibility="gone"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
 
             <com.google.android.material.button.MaterialButton
@@ -58,7 +84,8 @@
                     android:layout_margin="5dp"
                     app:rippleColor="@android:color/black"
                     android:textSize="12sp"
-                    android:text="June 27, 1998"
+                    android:text="Created on June 27, 1998"
+                    android:textAllCaps="false"
                     android:textColor="@android:color/black"
                     app:cornerRadius="15dp"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>

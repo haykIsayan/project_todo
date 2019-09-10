@@ -12,6 +12,8 @@ class AllCompleted: Resource.Failure()
 
 class NoCompleted: Resource.Failure()
 
+class NothingToShow: Resource.Failure()
+
 /**
  * Success Resources
  */

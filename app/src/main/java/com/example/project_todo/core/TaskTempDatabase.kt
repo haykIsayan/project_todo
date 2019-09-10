@@ -6,8 +6,8 @@ import com.example.project_todo.entity.Task
 object TaskTempDatabase {
 
     private val sTaskList = mutableListOf<Task>().apply {
-        add(Task("Be the hero they deserve, but not the one they need", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, false))
-        add(Task("Bless that donut", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, false))
+        add(Task("Be the hero they deserve, but not the one they need", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, isCompleted = false))
+        add(Task("Bless that donut", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, isCompleted = false, priority = 3))
 //        add(Task("Bring democracy to Cuba", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, false))
 //        add(Task("Take the hobbits to Isengard", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, false))
 //        add(Task("Build another Death Star", Constants.TEST_LIST_TITLE, Constants.TEST_DATE, false))

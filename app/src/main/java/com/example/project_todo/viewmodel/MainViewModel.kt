@@ -41,7 +41,7 @@ class MainViewModel(private val taskListRepository: TaskListRepository,
         currentTaskListData.value?.apply {
             invokeUseCase(
                 SaveTaskInteractor(
-                    Task(text, title, dateString, false, subTasks, priority),
+                    Task(text, title, dateString, isCompleted = false, subTasks = subTasks, priority = priority),
                     taskRepository
                 ), saveTaskEvent)
         }

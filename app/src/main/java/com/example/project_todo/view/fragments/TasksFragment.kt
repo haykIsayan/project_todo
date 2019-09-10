@@ -14,7 +14,7 @@ import com.example.project_todo.domain.tasklists.UpdateProgressInteractor
 import com.example.project_todo.entity.*
 import com.example.project_todo.view.TaskAdapter
 import com.example.project_todo.view.customviews.EmptyStateView
-import com.example.project_todo.view.customviews.TodoFilterView
+import com.example.project_todo.view.customviews.TaskFilterView
 import com.example.project_todo.viewmodel.MainViewModel
 import com.example.project_todo.viewmodel.TaskViewModel
 import org.koin.androidx.viewmodel.ext.android.getSharedViewModel
@@ -31,40 +31,47 @@ class TasksFragment : Fragment() {
      * Views & Widgets
      */
     private lateinit var taskProgressSeekBar: SeekBar
-    private lateinit var todoFilterView: TodoFilterView
+    private lateinit var taskFilterView: TaskFilterView
     private lateinit var emptyStateView: EmptyStateView
     private lateinit var taskRecyclerView: RecyclerView
     /**
      * Utilities
      */
     private lateinit var taskAdapter: TaskAdapter
-
     private var completeTaskDialog: AlertDialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.todos_fragment, container, false)
     }
 
+    /**
+     * Instantiate Views
+     */
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         emptyStateView = view.findViewById(R.id.esv_empty_state_todos_fragment)
-
+        // Setup Task Progress Bar
         taskProgressSeekBar = view.findViewById(R.id.sb_task_progress_task_fragment)
         taskProgressSeekBar.initTaskProgressMode()
-
-        todoFilterView = view.findViewById(R.id.tfv_todo_filter_todo_fragment)
-        todoFilterView.setOnTodoFiltered(this::filterTasks)
-        todoFilterView.setOnDateSelected(this::onDateSelected)
-
+        // Setup Task Filter View
+        taskFilterView = view.findViewById(R.id.tfv_todo_filter_todo_fragment)
+        taskFilterView.setOnTodoFiltered(this::filterTasks)
+        taskFilterView.setOnDateSelected(this::onDateSelected)
+        taskFilterView.setOnPriorityClick(this::onPrioritySelected)
+        // Setup Recycler View
         taskRecyclerView = view.findViewById(R.id.rv_todos_todos_fragment)
         taskAdapter = TaskAdapter(this::startTaskCompletion)
         taskRecyclerView.initTaskListMode(taskAdapter, ::startTaskCompletion, ::startTaskDeletion)
     }
 
+    override fun onViewStateRestored(savedInstanceState: Bundle?) {
+        super.onViewStateRestored(savedInstanceState)
+        taskFilterView.restoreState(taskViewModel.getTaskFilter())
+    }
+
     /**
-     * //////////////////////////////////////////////////////////////
      * Instantiate ViewModels & Observe All Live Data and Live Events
-     * //////////////////////////////////////////////////////////////
      */
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
@@ -78,26 +85,39 @@ class TasksFragment : Fragment() {
         mainViewModel.getAddTaskLiveEvent().observe(viewLifecycleOwner, Observer { updateTaskSaved(it) })
 
         taskViewModel.getTaskListProgressData().observe(viewLifecycleOwner, Observer { onTaskListProgressChanged(it) })
+
         taskViewModel.getAllTasksData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
-        taskViewModel.getFilteredTodosData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
+        taskViewModel.getFilteredTasksData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
 
         taskViewModel.getTaskInteractEvent().observe(viewLifecycleOwner, Observer { onTaskInteraction(it) })
     }
 
+    /**
+     * Display Updated Progress
+     */
+
     private fun onTaskListProgressChanged(resource: Resource<Float>) {
         resource.inspect({ taskProgressSeekBar.progress = it.toInt() })
+    }
+
+    /**
+     * Task Filtering
+     */
+
+    private fun onPrioritySelected(priority: Int) {
+        taskViewModel.filterTasksByPriority(priority)
     }
 
     private fun onDateSelected() {
         // TODO
     }
 
-    private fun filterTasks(taskFilter: Task.TaskFilter) {
-        taskViewModel.filterTasks(taskFilter)
+    private fun filterTasks(taskCompletion: Task.TaskCompletion) {
+        taskViewModel.filterTasksByCompletion(taskCompletion)
     }
 
     /**
-     * Complete Tasks
+     * Show Task Interaction Dialogs
      */
 
     private fun startTaskCompletion(task: Task, position: Int) =
@@ -110,6 +130,10 @@ class TasksFragment : Fragment() {
             { taskViewModel.deleteTask(task, position) },
             { taskAdapter.notifyItemChanged(position) })
     }
+
+    /**
+     * Inspect Task Interaction Result
+     */
 
     private fun onTaskInteraction(resource: Resource<Int>) {
         resource.inspect({
@@ -126,7 +150,7 @@ class TasksFragment : Fragment() {
 
     private fun updateTaskCompleted(task: Task, updatePosition: Int) {
         taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.UpdateAction.TASK_COMPLETED)
-        taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.mCurrentFilter)
+        taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.mCurrentCompletion)
     }
 
     /**
@@ -151,7 +175,7 @@ class TasksFragment : Fragment() {
     }
 
     /**
-     * Display Tasks
+     * Display Obtained and Filtered Tasks
      */
 
     private fun onTasksDataObtained(resource: Resource<List<Task>>?) {
@@ -168,9 +192,16 @@ class TasksFragment : Fragment() {
 
     }
 
+    /**
+     * Display Empty States
+     */
+
     private fun displayEmptyState(failure: Resource.Failure) {
         when (failure) {
             is AllCompleted -> displayAllCompletedEmptyState()
+            is NothingToShow ->{
+                taskRecyclerView.visibility = View.GONE
+            }
             is NoCompleted -> displayNoCompletedEmptyState()
         }
     }

@@ -20,9 +20,11 @@ import org.koin.androidx.viewmodel.ext.android.getSharedViewModel
 object Constants {
     const val TEST_DATE = "June 28, 1998"
     const val TEST_LIST_TITLE = "My Tasks"
+    const val TEST_GROCERY_TITLE = "Groceries"
 }
 
 val dummieTaskList = TaskList(Constants.TEST_LIST_TITLE, 0F, 4F)
+val dummieGroceryList = TaskList(Constants.TEST_GROCERY_TITLE, 0F, 0F)
 
 fun RecyclerView.initTaskListMode(adapter: TaskAdapter,
                                   onCompleteSwipe: (Task, Int) -> Unit,
