@@ -20,7 +20,6 @@ import com.example.project_todo.viewmodel.TaskViewModel
 import org.koin.androidx.viewmodel.ext.android.getSharedViewModel
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
-
 class TasksFragment : Fragment() {
     /**
      * View Models
@@ -38,7 +37,6 @@ class TasksFragment : Fragment() {
      * Utilities
      */
     private lateinit var taskAdapter: TaskAdapter
-    private var completeTaskDialog: AlertDialog? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.todos_fragment, container, false)
@@ -56,18 +54,19 @@ class TasksFragment : Fragment() {
         taskProgressSeekBar.initTaskProgressMode()
         // Setup Task Filter View
         taskFilterView = view.findViewById(R.id.tfv_todo_filter_todo_fragment)
-        taskFilterView.setOnTodoFiltered(this::filterTasks)
-        taskFilterView.setOnDateSelected(this::onDateSelected)
-        taskFilterView.setOnPriorityClick(this::onPrioritySelected)
+        taskFilterView.setOnTodoFiltered(::filterTasks)
+        taskFilterView.setOnDateSelected(::onDateSelected)
+        taskFilterView.setOnPriorityClick(::onPrioritySelected)
         // Setup Recycler View
         taskRecyclerView = view.findViewById(R.id.rv_todos_todos_fragment)
-        taskAdapter = TaskAdapter(this::startTaskCompletion)
-        taskRecyclerView.initTaskListMode(taskAdapter, ::startTaskCompletion, ::startTaskDeletion)
+        taskAdapter = TaskAdapter(this::completeTask)
+        taskRecyclerView.initTaskListMode(taskAdapter, ::completeTask, ::deleteTask)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         taskFilterView.restoreState(taskViewModel.getTaskFilter())
+
     }
 
     /**
@@ -82,11 +81,13 @@ class TasksFragment : Fragment() {
         mainViewModel.getCurrentTaskListData()
             .observe(viewLifecycleOwner, Observer { taskViewModel.setProgressAndFetchAllTasks(it) })
 
-        mainViewModel.getAddTaskLiveEvent().observe(viewLifecycleOwner, Observer { updateTaskSaved(it) })
+        mainViewModel.getSaveTaskLiveEvent().observe(viewLifecycleOwner, Observer { onTaskSaved(it) })
 
         taskViewModel.getTaskListProgressData().observe(viewLifecycleOwner, Observer { onTaskListProgressChanged(it) })
 
-        taskViewModel.getAllTasksData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
+        taskViewModel.getAllTasksData()
+            .observe(viewLifecycleOwner, Observer { if (savedInstanceState == null) { onTasksDataObtained(it) } })
+
         taskViewModel.getFilteredTasksData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
 
         taskViewModel.getTaskInteractEvent().observe(viewLifecycleOwner, Observer { onTaskInteraction(it) })
@@ -120,27 +121,36 @@ class TasksFragment : Fragment() {
      * Show Task Interaction Dialogs
      */
 
-    private fun startTaskCompletion(task: Task, position: Int) =
-        showCompleteTaskDialog(task,
-            { taskViewModel.completeTask(task, position) },
-            { taskAdapter.notifyItemChanged(position) })
+    private fun completeTask(task: Task, position: Int) = taskViewModel.completeTask(task, true, position)
 
-    private fun startTaskDeletion(task: Task, position: Int) {
-        showDeleteTaskDialog(task,
-            { taskViewModel.deleteTask(task, position) },
-            { taskAdapter.notifyItemChanged(position) })
-    }
+    private fun deleteTask(task: Task, position: Int) = taskViewModel.deleteTask(task, position)
 
     /**
      * Inspect Task Interaction Result
      */
 
     private fun onTaskInteraction(resource: Resource<Int>) {
-        resource.inspect({
-            when (resource) {
-                is TaskCompleted -> updateTaskCompleted(resource.task, it)
-                is TaskDeleted -> updateTaskDeleted(resource.task, it)
-            }
+//        resource.inspect({
+//            when (resource) {
+//                is TaskCompleted -> {
+//                    resource.apply {
+//                        if (completed) {
+//                            onTaskCompleted(task, successData)
+//                        } else {
+//                            onTaskUndoCompleted(task, successData)
+//                        }
+//                    }
+//                }
+//                is TaskDeleted -> onTaskDeleted(resource.task, it)
+//            }
+//        })
+
+        resource.inspectFor<TaskCompleted, TaskUndoCompleted, TaskDeleted>({
+            onTaskCompleted(it.task, it.successData)
+        },{
+            onTaskUndoCompleted(it.task, it.successData)
+        }, {
+            onTaskDeleted(it.task, it.successData)
         })
     }
 
@@ -148,30 +158,59 @@ class TasksFragment : Fragment() {
      * Update User Interface once Task has been Completed
      */
 
-    private fun updateTaskCompleted(task: Task, updatePosition: Int) {
-        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.UpdateAction.TASK_COMPLETED)
-        taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.mCurrentCompletion)
+    private fun onTaskCompleted(task: Task, updatePosition: Int) {
+        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_COMPLETED)
+        taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.getTaskCompletion())
+        showUndoCompleteSnackBar(task)
+    }
+
+    private fun onTaskUndoCompleted(task: Task, updatePosition: Int) {
+        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED)
+        taskAdapter.updateTaskUndoCompleted(task, updatePosition, taskViewModel.getTaskCompletion())
     }
 
     /**
      * Update User Interface once Task has been Deleted
      */
 
-    private fun updateTaskDeleted(task: Task, updatePosition: Int) {
-        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.UpdateAction.TASK_DELETED)
+    private fun onTaskDeleted(task: Task, updatePosition: Int) {
+        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_DELETED)
         taskAdapter.updateTaskDeleted(updatePosition)
+        showUndoDeleteSnackBar(task)
+    }
+
+    /**
+     * Show Undo SnackBar for reversing task interaction
+     */
+
+    private fun showUndoCompleteSnackBar(task: Task) {
+       showUndoSnackBar(task.text, resources.getString(R.string.undo_complete_action), this::undoTaskComplete)
+    }
+
+    private fun showUndoDeleteSnackBar(task: Task) {
+        showUndoSnackBar(task.text, resources.getString(R.string.undo_delete_action), this::undoTaskDelete)
+    }
+
+    private fun undoTaskComplete() {
+        taskViewModel.undoTaskComplete()
+    }
+
+    private fun undoTaskDelete() {
+        taskViewModel.getTaskInteractEvent().value?.inspectFor<TaskDeleted> {
+            mainViewModel.undoDeleteTask(it.task, it.successData)
+        }
     }
 
     /**
      * Update User Interface once Task has been Saved
      */
 
-    private fun updateTaskSaved(resource: Resource<Task>) {
-        resource.inspect({
-            mainViewModel.completeSaveTaskEvent()
-            taskViewModel.updateTaskListProgress(it, UpdateProgressInteractor.UpdateAction.TASK_SAVED)
-            taskAdapter.updateTaskSaved(it)
-        })
+    private fun onTaskSaved(resource: Resource<Task>) {
+        resource.inspectFor<TaskSaved> {
+            mainViewModel.disableSaveTaskEvent()
+            taskViewModel.updateTaskListProgress(it.successData, UpdateProgressInteractor.TaskAction.TASK_SAVED)
+            taskAdapter.updateTaskSaved(it.successData, it.updatePosition)
+        }
     }
 
     /**
@@ -185,7 +224,7 @@ class TasksFragment : Fragment() {
     private fun displayTasks(list: List<Task>) {
         taskRecyclerView.visibility = View.VISIBLE
         emptyStateView.visibility = View.GONE
-        taskAdapter.setTodoList(list)
+        taskAdapter.setTasks(list)
     }
 
     private fun displayLoading(pendingMessage: String) {

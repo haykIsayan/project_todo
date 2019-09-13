@@ -6,7 +6,7 @@ data class Error(val throwable: Throwable): Resource.Failure()
  * Failure Resources
  */
 
-class NoTodos: Resource.Failure()
+class NoTasks: Resource.Failure()
 
 class AllCompleted: Resource.Failure()
 
@@ -18,6 +18,10 @@ class NothingToShow: Resource.Failure()
  * Success Resources
  */
 
-class TaskCompleted(val task: Task, updatePosition: Int): Resource.Success<Int>(updatePosition)
+class TaskSaved(task: Task, var updatePosition: Int = -1): Resource.EventResource<Task>(task)
 
-class TaskDeleted(val task: Task, updatePosition: Int): Resource.Success<Int>(updatePosition)
+class TaskCompleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)
+
+class TaskUndoCompleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)
+
+class TaskDeleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)

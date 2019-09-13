@@ -49,12 +49,13 @@ class TaskFilterView(context: Context, attributeSet: AttributeSet): HorizontalSc
 
     fun restoreState(taskFilter: TaskFilter) {
         taskFilter.apply {
-            val button = when (taskCompletion) {
+            when (taskCompletion) {
                 Task.TaskCompletion.ALL -> mbAllTodos
                 Task.TaskCompletion.TODO -> mbTodos
                 Task.TaskCompletion.COMPLETED -> mbCompleted
+            }.apply {
+                onFilterClicked(this, taskCompletion, false)
             }
-            onFilterClicked(button, taskCompletion, false)
 
             mbSelectDate.text = creationDate
             mbPriority.text = priorityItems[priority]

@@ -1,10 +1,7 @@
 <resources>
     <string name="app_name">Taskmeister</string>
-    <string name="complete_dialog_title">Complete Task?</string>
-    <string name="complete_dialog_positive">Complete</string>
-    <string name="delete_dialog_title">Delete Task?</string>
-    <string name="delete_dialog_positive">Delete</string>
-    <string name="task_dialog_negative">Cancel</string>
+    <string name="undo_complete_action">Undo Complete</string>
+    <string name="undo_delete_action">Undo Delete</string>
 
     <string name="task_top_priority">Top Priority</string>
     <string name="task_mid_priority">Mid Priority</string>

@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             it.inspect(::onTaskListsObtained, ::onPending, ::onFailure, ::onError)
         })
 
-        mainViewModel.getAddTaskLiveEvent().observe(this, Observer { onTaskSaved() })
+        mainViewModel.getSaveTaskLiveEvent().observe(this, Observer { onTaskSaved() })
 
         mainViewModel.getErrorData().observe(this, Observer { onError(it) })
 

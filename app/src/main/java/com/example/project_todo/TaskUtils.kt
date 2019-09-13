@@ -3,6 +3,7 @@ package com.example.project_todo
 import android.widget.SeekBar
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +15,8 @@ import com.example.project_todo.view.MainActivity
 import com.example.project_todo.view.TaskAdapter
 import com.example.project_todo.view.fragments.TasksFragment
 import com.example.project_todo.viewmodel.MainViewModel
+import com.google.android.material.snackbar.BaseTransientBottomBar
+import com.google.android.material.snackbar.Snackbar
 import org.koin.androidx.viewmodel.ext.android.getSharedViewModel
 
 
@@ -23,7 +26,7 @@ object Constants {
     const val TEST_GROCERY_TITLE = "Groceries"
 }
 
-val dummieTaskList = TaskList(Constants.TEST_LIST_TITLE, 0F, 4F)
+val dummieTaskList = TaskList(Constants.TEST_LIST_TITLE, 0F, 0F)
 val dummieGroceryList = TaskList(Constants.TEST_GROCERY_TITLE, 0F, 0F)
 
 fun RecyclerView.initTaskListMode(adapter: TaskAdapter,
@@ -51,57 +54,28 @@ fun RecyclerView.initTaskListMode(adapter: TaskAdapter,
     ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(this)
 }
 
-fun TasksFragment.showTaskInteractionDialog(task: Task, isComplete: Boolean,
-
-
-                                         onPositive: () -> Unit, onNegative: () -> Unit)
-        = AlertDialog.Builder(this.context!!)
-
-    .setTitle(if (isComplete) {
-        resources.getString(R.string.complete_dialog_title)
-    } else {
-        resources.getString(R.string.delete_dialog_title)
-    })
-    .setMessage(task.text)
-    .setCancelable(false)
-    .setPositiveButton(if (isComplete) {
-        resources.getString(R.string.complete_dialog_positive)
-    } else {
-        resources.getString(R.string.delete_dialog_positive)
-    }) { _, _ -> onPositive() }
-    .setNegativeButton(resources.getString(R.string.task_dialog_negative)) { _, _ -> onNegative() }
-    .create()
-    .show()
-
-
-fun TasksFragment.showCompleteTaskDialog(task: Task, onPositive: () -> Unit, onNegative: () -> Unit)
-        = AlertDialog.Builder(this.context!!)
-
-    .setTitle(resources.getString(R.string.complete_dialog_title))
-    .setMessage(task.text)
-    .setCancelable(false)
-    .setPositiveButton(resources.getString(R.string.complete_dialog_positive)) { _, _ -> onPositive() }
-    .setNegativeButton(resources.getString(R.string.task_dialog_negative)) { _, _ -> onNegative() }
-    .create()
-    .show()
-
-fun TasksFragment.showDeleteTaskDialog(task: Task, onPositive: () -> Unit, onNegative: () -> Unit)
-        = AlertDialog.Builder(this.context!!)
-
-    .setTitle(resources.getString(R.string.delete_dialog_title))
-    .setMessage(task.text)
-    .setCancelable(false)
-    .setPositiveButton(resources.getString(R.string.delete_dialog_positive)) { _, _ -> onPositive() }
-    .setNegativeButton(resources.getString(R.string.task_dialog_negative)) { _, _ -> onNegative() }
-    .create()
-    .show()
-
 fun Fragment.sendError(throwable: Throwable) {
     getSharedViewModel<MainViewModel>().sendError(throwable)
 }
 
-fun TasksFragment.initTaskProgressSeekBar() {
+fun TasksFragment.showUndoSnackBar(taskText: String, actionText: String, onAction: () -> Unit) {
+    val snackBar = Snackbar.make(view!!, " ", Snackbar.LENGTH_LONG)
+    snackBar.setTextColor(context?.resources!!.getColor(R.color.colorPrimary))
+    snackBar.setActionTextColor(context?.resources!!.getColor(R.color.colorPrimary))
+    snackBar.setText(taskText)
+    snackBar.setAction(actionText) {
+        onAction()
+    }
+    snackBar.addCallback(object  : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+            super.onDismissed(transientBottomBar, event)
+            if (event == BaseTransientBottomBar.BaseCallback.DISMISS_EVENT_TIMEOUT) {
+//                onDismiss()
+            }
+        }
+    })
 
+    snackBar.show()
 }
 
 fun SeekBar.initTaskProgressMode() {
