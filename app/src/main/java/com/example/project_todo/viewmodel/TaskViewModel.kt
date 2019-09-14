@@ -77,14 +77,14 @@ class TaskViewModel(private val taskRepository: TaskRepository,
      * Undo Task Interaction
      */
 
-    fun undoTaskComplete() {
-        taskInteractEvent.value?.apply {
-            inspectFor<TaskCompleted> {
+    fun undoTaskComplete(task: Task, position: Int) {
+//        taskInteractEvent.value?.apply {
+//            inspectFor<TaskCompleted> {
                 executeUseCase(
-                        CompleteTaskInteractor(it.task, false, successData, taskRepository),
+                        CompleteTaskInteractor(task, false, position, taskRepository),
                         taskInteractEvent, taskInteractEvent::persistAndDisable)
-            }
-        }
+//            }
+//        }
 
     }
 

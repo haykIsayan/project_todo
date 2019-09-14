@@ -2,22 +2,33 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-            android:id="@+id/add_photo"
-            android:title="Add Photo"
+            android:id="@+id/toggle_descritpion"
+            android:title="Description"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_subtask"/>
+
+    <item
+            android:id="@+id/add_deadline"
+            android:title="Deadline"
             app:showAsAction="ifRoom"
             android:icon="@drawable/ic_action_reminder"/>
 
-    <!--<item-->
-            <!--android:id="@+id/add_reminder"-->
-            <!--android:title="Add Reminder"-->
-            <!--app:showAsAction="ifRoom"-->
-            <!--android:icon="@drawable/ic_action_reminder"/>-->
+    <item
+            android:id="@+id/save_task"
+            android:title="Save"
+            android:icon="@drawable/ic_action_save"/>
 
+    <item
+            android:id="@+id/add_priority"
+            android:title="Priority"
+            app:showAsAction="ifRoom"
+            android:icon="@drawable/ic_action_priority"/>
 
-    <!--<item-->
-            <!--android:id="@+id/add_voice"-->
-            <!--android:title="Add Voice"-->
-            <!--app:showAsAction="ifRoom"-->
-            <!--android:icon="@drawable/ic_action_voice"/>-->
+    <item
+            android:id="@+id/add_image"
+            android:title="Image"
+            app:showAsAction="ifRoom"
+            android:iconTint="@android:color/black"
+            android:icon="@drawable/ic_action_photo"/>
 
 </menu>

@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
@@ -14,6 +13,7 @@ import com.example.project_todo.domain.tasklists.UpdateProgressInteractor
 import com.example.project_todo.entity.*
 import com.example.project_todo.view.TaskAdapter
 import com.example.project_todo.view.customviews.EmptyStateView
+import com.example.project_todo.view.customviews.TaskBundleView
 import com.example.project_todo.view.customviews.TaskFilterView
 import com.example.project_todo.viewmodel.MainViewModel
 import com.example.project_todo.viewmodel.TaskViewModel
@@ -29,7 +29,7 @@ class TasksFragment : Fragment() {
     /**
      * Views & Widgets
      */
-    private lateinit var taskProgressSeekBar: SeekBar
+    private lateinit var taskBundleView: TaskBundleView
     private lateinit var taskFilterView: TaskFilterView
     private lateinit var emptyStateView: EmptyStateView
     private lateinit var taskRecyclerView: RecyclerView
@@ -39,7 +39,7 @@ class TasksFragment : Fragment() {
     private lateinit var taskAdapter: TaskAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.todos_fragment, container, false)
+        return inflater.inflate(R.layout.tasks_fragment, container, false)
     }
 
     /**
@@ -48,10 +48,10 @@ class TasksFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        taskBundleView = view.findViewById(R.id.tbv_task_bundle_tasks_fragment)
+
         emptyStateView = view.findViewById(R.id.esv_empty_state_todos_fragment)
-        // Setup Task Progress Bar
-        taskProgressSeekBar = view.findViewById(R.id.sb_task_progress_task_fragment)
-        taskProgressSeekBar.initTaskProgressMode()
         // Setup Task Filter View
         taskFilterView = view.findViewById(R.id.tfv_todo_filter_todo_fragment)
         taskFilterView.setOnTodoFiltered(::filterTasks)
@@ -59,14 +59,13 @@ class TasksFragment : Fragment() {
         taskFilterView.setOnPriorityClick(::onPrioritySelected)
         // Setup Recycler View
         taskRecyclerView = view.findViewById(R.id.rv_todos_todos_fragment)
-        taskAdapter = TaskAdapter(this::completeTask)
+        taskAdapter = TaskAdapter(this::onCompleteTaskAction)
         taskRecyclerView.initTaskListMode(taskAdapter, ::completeTask, ::deleteTask)
     }
 
     override fun onViewStateRestored(savedInstanceState: Bundle?) {
         super.onViewStateRestored(savedInstanceState)
         taskFilterView.restoreState(taskViewModel.getTaskFilter())
-
     }
 
     /**
@@ -79,7 +78,7 @@ class TasksFragment : Fragment() {
         mainViewModel = getSharedViewModel()
 
         mainViewModel.getCurrentTaskListData()
-            .observe(viewLifecycleOwner, Observer { taskViewModel.setProgressAndFetchAllTasks(it) })
+            .observe(viewLifecycleOwner, Observer { onCurrentTaskBundleSet(it) })
 
         mainViewModel.getSaveTaskLiveEvent().observe(viewLifecycleOwner, Observer { onTaskSaved(it) })
 
@@ -93,12 +92,19 @@ class TasksFragment : Fragment() {
         taskViewModel.getTaskInteractEvent().observe(viewLifecycleOwner, Observer { onTaskInteraction(it) })
     }
 
+    private fun onCurrentTaskBundleSet(taskList: TaskList) {
+        taskBundleView.setTaskBundle(taskList)
+        taskViewModel.setProgressAndFetchAllTasks(taskList)
+    }
+
     /**
      * Display Updated Progress
      */
 
     private fun onTaskListProgressChanged(resource: Resource<Float>) {
-        resource.inspect({ taskProgressSeekBar.progress = it.toInt() })
+        resource.inspect({
+            taskBundleView.updateProgress(it.toInt())
+        })
     }
 
     /**
@@ -121,6 +127,14 @@ class TasksFragment : Fragment() {
      * Show Task Interaction Dialogs
      */
 
+    private fun onCompleteTaskAction(task: Task, position: Int) {
+        if (task.isCompleted) {
+            undoTaskComplete(task, position)
+        } else {
+            completeTask(task, position)
+        }
+    }
+
     private fun completeTask(task: Task, position: Int) = taskViewModel.completeTask(task, true, position)
 
     private fun deleteTask(task: Task, position: Int) = taskViewModel.deleteTask(task, position)
@@ -130,21 +144,6 @@ class TasksFragment : Fragment() {
      */
 
     private fun onTaskInteraction(resource: Resource<Int>) {
-//        resource.inspect({
-//            when (resource) {
-//                is TaskCompleted -> {
-//                    resource.apply {
-//                        if (completed) {
-//                            onTaskCompleted(task, successData)
-//                        } else {
-//                            onTaskUndoCompleted(task, successData)
-//                        }
-//                    }
-//                }
-//                is TaskDeleted -> onTaskDeleted(resource.task, it)
-//            }
-//        })
-
         resource.inspectFor<TaskCompleted, TaskUndoCompleted, TaskDeleted>({
             onTaskCompleted(it.task, it.successData)
         },{
@@ -161,7 +160,6 @@ class TasksFragment : Fragment() {
     private fun onTaskCompleted(task: Task, updatePosition: Int) {
         taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_COMPLETED)
         taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.getTaskCompletion())
-        showUndoCompleteSnackBar(task)
     }
 
     private fun onTaskUndoCompleted(task: Task, updatePosition: Int) {
@@ -184,15 +182,15 @@ class TasksFragment : Fragment() {
      */
 
     private fun showUndoCompleteSnackBar(task: Task) {
-       showUndoSnackBar(task.text, resources.getString(R.string.undo_complete_action), this::undoTaskComplete)
+//       showUndoSnackBar(task.text, resources.getString(R.string.undo_complete_action), this::undoTaskComplete)
     }
 
     private fun showUndoDeleteSnackBar(task: Task) {
         showUndoSnackBar(task.text, resources.getString(R.string.undo_delete_action), this::undoTaskDelete)
     }
 
-    private fun undoTaskComplete() {
-        taskViewModel.undoTaskComplete()
+    private fun undoTaskComplete(task: Task, position: Int) {
+        taskViewModel.undoTaskComplete(task, position)
     }
 
     private fun undoTaskDelete() {

@@ -5,11 +5,11 @@ import android.view.*
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_todo.R
 import com.example.project_todo.entity.Task
-import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.radiobutton.MaterialRadioButton
 import com.google.android.material.textview.MaterialTextView
 
 
-class TaskAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(private val onCompleteTask: (Task, Int) -> Unit): RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
     private val taskList = mutableListOf<Task>()
     
@@ -55,7 +55,7 @@ class TaskAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerV
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TaskViewHolder {
         return TaskViewHolder(LayoutInflater.from(parent.context)
-            .inflate(R.layout.layout_todo_preview, parent, false))
+            .inflate(R.layout.layout_task_preview, parent, false))
     }
 
     override fun getItemCount(): Int = taskList.size
@@ -66,24 +66,38 @@ class TaskAdapter(private val onCheckBoxClicked: (Task, Int) -> Unit): RecyclerV
 
     inner class TaskViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-        private val mcbComplete: MaterialCheckBox = itemView.findViewById(R.id.mcb_complete_layout_todo_preview)
-        private val mtvTodoText: MaterialTextView = itemView.findViewById(R.id.mtv_todo_text_layout_todo_preview)
+        private val mrbComplete: MaterialRadioButton = itemView.findViewById(R.id.mrb_complete_layout_todo_preview)
+        private val mtvTaskText: MaterialTextView = itemView.findViewById(R.id.mtv_task_text_layout_task_preview)
+        private val mtvTaskDescription: MaterialTextView = itemView.findViewById(R.id.mtv_task_description_layout_task_preview)
 
         fun bind(task: Task) {
-            mtvTodoText.text = task.text
+            mtvTaskText.text = task.text
+            mtvTaskDescription.text = task.description
 
             if (task.isCompleted) {
-                mcbComplete.isChecked = true
-                mcbComplete.isEnabled = false
-                mtvTodoText.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                mrbComplete.isChecked = true
+                mtvTaskText.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
+                mtvTaskDescription.paintFlags = Paint.STRIKE_THRU_TEXT_FLAG
             } else {
-                mcbComplete.isChecked = false
-                mcbComplete.isEnabled = true
-                mtvTodoText.paintFlags = Paint.LINEAR_TEXT_FLAG
+                mrbComplete.isChecked = false
+                mrbComplete.isEnabled = true
+                mtvTaskText.paintFlags = Paint.LINEAR_TEXT_FLAG
+                mtvTaskDescription.paintFlags = Paint.LINEAR_TEXT_FLAG
             }
 
-            mcbComplete.setOnClickListener { onCheckBoxClicked(task, adapterPosition) }
-            itemView.setOnLongClickListener { onCheckBoxClicked(task, adapterPosition); true }
+            mrbComplete.setOnClickListener { onCompleteTask(task, adapterPosition) }
+            itemView.setOnLongClickListener { onCompleteTask(task, adapterPosition); true }
+
+            itemView.setOnClickListener {
+
+                mtvTaskDescription.apply {
+                   visibility =  if (visibility == View.GONE && task.description.isNotEmpty()) {
+                        View.VISIBLE
+                    } else {
+                        View.GONE
+                    }
+                }
+            }
         }
     }
 }

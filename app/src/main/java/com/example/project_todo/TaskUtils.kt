@@ -1,9 +1,11 @@
 package com.example.project_todo
 
+import android.view.Gravity
+import android.widget.FrameLayout
 import android.widget.SeekBar
-import androidx.appcompat.app.AlertDialog
+import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,9 +62,18 @@ fun Fragment.sendError(throwable: Throwable) {
 
 fun TasksFragment.showUndoSnackBar(taskText: String, actionText: String, onAction: () -> Unit) {
     val snackBar = Snackbar.make(view!!, " ", Snackbar.LENGTH_LONG)
+    snackBar.setAnchorView(R.id.fab_add_task_activity_main)
     snackBar.setTextColor(context?.resources!!.getColor(R.color.colorPrimary))
     snackBar.setActionTextColor(context?.resources!!.getColor(R.color.colorPrimary))
+    snackBar.view.background = resources.getDrawable(R.drawable.layout_snackbar_background)
     snackBar.setText(taskText)
+    val layoutParams = snackBar.view.layoutParams
+    (layoutParams as CoordinatorLayout.LayoutParams).apply {
+        marginStart = 15
+        marginEnd = 15
+    }
+
+
     snackBar.setAction(actionText) {
         onAction()
     }
@@ -82,7 +93,7 @@ fun SeekBar.initTaskProgressMode() {
     setOnTouchListener { _, _ -> true }
 }
 
-fun MainActivity.initAddTaskDialog(onSaveTask: (String, String, List<String>, Int) -> Unit) =
+fun MainActivity.initAddTaskDialog(onSaveTask: (String, String, String, Int) -> Unit) =
     AddNewTaskDialog(this, onSaveTask)
         .apply {
             setContentView(R.layout.layout_new_task)

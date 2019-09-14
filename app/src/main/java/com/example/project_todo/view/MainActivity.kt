@@ -10,7 +10,6 @@ import com.example.project_todo.entity.Resource
 import com.example.project_todo.entity.TaskList
 import com.example.project_todo.initAddTaskDialog
 import com.example.project_todo.viewmodel.MainViewModel
-import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
@@ -18,7 +17,6 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mainViewModel: MainViewModel
 
-    private lateinit var mainToolBar: MaterialToolbar
     private lateinit var addTaskFab: FloatingActionButton
 
     private var addTaskDialog: AddNewTaskDialog? = null
@@ -28,9 +26,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         mainViewModel = getViewModel()
 
-        mainToolBar = findViewById(R.id.mtb_toolbar_activity_main)
-        mainToolBar.setNavigationOnClickListener { }
-
         mainViewModel.getTaskListsData().observe(this, Observer {
             it.inspect(::onTaskListsObtained, ::onPending, ::onFailure, ::onError)
         })
@@ -39,14 +34,13 @@ class MainActivity : AppCompatActivity() {
 
         mainViewModel.getErrorData().observe(this, Observer { onError(it) })
 
-        addTaskFab = findViewById(R.id.fab_add_todo_activity_main)
+        addTaskFab = findViewById(R.id.fab_add_task_activity_main)
         addTaskFab.setOnClickListener { addTask() }
     }
 
     private fun onTaskListsObtained(taskLists: List<TaskList>) {
         if (taskLists.isNotEmpty()) {
             val taskList = taskLists[0]
-            mainToolBar.title = taskList.title
             mainViewModel.setCurrentTaskList(taskLists[0])
         }
     }

@@ -10,7 +10,6 @@ import com.example.project_todo.domain.tasks.storage.SaveTaskInteractor
 import com.example.project_todo.entity.Resource
 import com.example.project_todo.entity.Task
 import com.example.project_todo.entity.TaskList
-import com.example.project_todo.entity.TaskSaved
 
 class MainViewModel(private val taskListRepository: TaskListRepository,
                     private val taskRepository: TaskRepository): BaseViewModel<List<Task>>() {
@@ -37,9 +36,9 @@ class MainViewModel(private val taskListRepository: TaskListRepository,
         errorLiveData.value = throwable
     }
 
-    fun saveTask(text: String, dateString: String, subTasks: List<String>, priority: Int) {
+    fun saveTask(text: String, description: String, dateString: String, priority: Int) {
         currentTaskListData.value?.apply {
-            saveTask(Task(text, title, dateString, isCompleted = false, subTasks = subTasks, priority = priority))
+            saveTask(Task(text, description, title, dateString, isCompleted = false, priority = priority))
         }
     }
 

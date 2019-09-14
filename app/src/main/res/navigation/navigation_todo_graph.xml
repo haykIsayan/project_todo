@@ -5,7 +5,7 @@
             app:startDestination="@id/destination_todos">
 
     <fragment android:id="@+id/destination_todos" android:name="com.example.project_todo.view.fragments.TasksFragment"
-              android:label="todos_fragment" tools:layout="@layout/todos_fragment"/>
+              android:label="todos_fragment" tools:layout="@layout/tasks_fragment"/>
     <fragment android:id="@+id/searchFragment" android:name="com.example.project_todo.view.fragments.SearchFragment"
               android:label="search_fragment" tools:layout="@layout/search_fragment"/>
 </navigation>
