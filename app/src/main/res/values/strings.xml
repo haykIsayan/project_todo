@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">Taskmeister</string>
+    <string name="app_name">Master Task</string>
+
     <string name="undo_complete_action">Undo Complete</string>
     <string name="undo_delete_action">Undo Delete</string>
 

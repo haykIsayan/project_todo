@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-                                                     android:background="@android:color/white">
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="100dp"
+            android:layout_marginBottom="?actionBarSize"
             android:orientation="vertical">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -29,19 +30,19 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:background="@null"
+                android:layout_marginTop="10dp"
                 android:layout_marginStart="30dp"
                 android:layout_marginEnd="30dp"
+                android:layout_marginBottom="10dp"
                 android:hint="Task description"
                 android:gravity="start"
                 android:visibility="gone"/>
 
-        <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rv_subtasks_layout_new_todo"
+        <com.example.project_todo.view.customviews.TaskDetailView
+                android:id="@+id/tdv_task_details_layout_new_task"
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
-                android:layout_margin="15dp"
-                android:background="@android:color/white"
-                android:visibility="gone"/>
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"/>
 
     </LinearLayout>
 
@@ -55,6 +56,6 @@
             app:itemRippleColor="@android:color/black"
             app:itemTextColor="@android:color/black"
             app:labelVisibilityMode="unlabeled"
-    android:layout_gravity="bottom"/>
+            android:layout_gravity="bottom"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

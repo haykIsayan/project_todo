@@ -12,11 +12,15 @@ class CompleteTaskInteractor(private val task: Task,
     override suspend fun onExecute(): Resource<Int> {
         task.isCompleted = completeTask
         taskRepository.updateTask(task)
-
         return if (completeTask) {
             TaskCompleted(task, updatePosition)
         } else {
             TaskUndoCompleted(task, updatePosition)
         }
+    }
+
+    override fun onError(throwable: Throwable): Error {
+        task.isCompleted = !completeTask
+        return ErrorCompleted(updatePosition, throwable)
     }
 }

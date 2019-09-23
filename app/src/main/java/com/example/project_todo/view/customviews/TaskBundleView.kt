@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import com.example.project_todo.R
-import com.example.project_todo.entity.TaskList
+import com.example.project_todo.entity.TaskCollection
 import com.example.project_todo.initTaskProgressMode
 import com.google.android.material.textview.MaterialTextView
 
@@ -24,9 +24,9 @@ class TaskBundleView(context: Context, attributeSet: AttributeSet): LinearLayout
         taskBundleProgressBar.initTaskProgressMode()
     }
 
-    fun setTaskBundle(taskList: TaskList) {
-        taskBundleTitle.text = taskList.title
-        taskBundleProgress.text = "${taskList.getProgression().toInt()} %"
+    fun setTaskBundle(taskCollection: TaskCollection) {
+        taskBundleTitle.text = taskCollection.title
+        taskBundleProgress.text = "${taskCollection.getProgression().toInt()} %"
     }
 
     fun updateProgress(progress: Int) {

@@ -6,22 +6,23 @@ import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.Observer
 import com.example.project_todo.entity.Resource
 
-open class LiveEvent<T>: MediatorLiveData<Resource.EventResource<T>>() {
+open class LiveEvent<T>: MediatorLiveData<Resource<T>>() {
 
-    final override fun observe(owner: LifecycleOwner, observer: Observer<in Resource.EventResource<T>>) {
+    final override fun observe(owner: LifecycleOwner, observer: Observer<in Resource<T>>) {
         super.observe(owner, Observer {
             value?.apply {
                 if (isActive) {
                     observer.onChanged(this)
-                    onFinished(this)
+
+                    if (this !is Resource.Pending) { onFinished(this) }
                 }
             }
         })
     }
 
-    protected open fun onFinished(eventResult: Resource.EventResource<T>) { }
+    protected open fun onFinished(eventResult: Resource<T>) { }
 
-    fun invoke(eventResource: Resource.EventResource<T>) {
+    fun invoke(eventResource: Resource<T>) {
         value = eventResource
     }
 
@@ -32,6 +33,4 @@ open class LiveEvent<T>: MediatorLiveData<Resource.EventResource<T>>() {
     fun complete() {
         value = null
     }
-
-
 }

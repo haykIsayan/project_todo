@@ -12,8 +12,11 @@ class SaveTaskInteractor(private val task: Task,
                          private val taskRepository: TaskRepository): LiveInteractor<Task>() {
 
     override suspend fun onExecute(): Resource<Task> {
-        taskRepository.saveTask(task)
+        task.id = taskRepository.saveTask(task)
         return TaskSaved(task, updatePosition)
     }
 
+    override fun onError(throwable: Throwable): Error {
+        return super.onError(throwable)
+    }
 }

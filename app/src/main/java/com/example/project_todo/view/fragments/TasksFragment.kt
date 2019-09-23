@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.SeekBar
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.example.project_todo.*
 import com.example.project_todo.domain.tasklists.UpdateProgressInteractor
@@ -59,7 +57,7 @@ class TasksFragment : Fragment() {
         taskFilterView.setOnPriorityClick(::onPrioritySelected)
         // Setup Recycler View
         taskRecyclerView = view.findViewById(R.id.rv_todos_todos_fragment)
-        taskAdapter = TaskAdapter(this::onCompleteTaskAction)
+        taskAdapter = TaskAdapter(::completeTask, ::undoTaskComplete)
         taskRecyclerView.initTaskListMode(taskAdapter, ::completeTask, ::deleteTask)
     }
 
@@ -77,34 +75,34 @@ class TasksFragment : Fragment() {
         taskViewModel = getViewModel()
         mainViewModel = getSharedViewModel()
 
-        mainViewModel.getCurrentTaskListData()
-            .observe(viewLifecycleOwner, Observer { onCurrentTaskBundleSet(it) })
+        observe(mainViewModel::getCurrentTaskListData, ::onCurrentTaskBundleSet)
 
-        mainViewModel.getSaveTaskLiveEvent().observe(viewLifecycleOwner, Observer { onTaskSaved(it) })
+        observe(mainViewModel::getSaveTaskLiveEvent, ::onTaskSaved)
 
-        taskViewModel.getTaskListProgressData().observe(viewLifecycleOwner, Observer { onTaskListProgressChanged(it) })
+        observe(taskViewModel::getTaskCollectionProgressData, ::onTaskCollectionProgressChanged)
 
-        taskViewModel.getAllTasksData()
-            .observe(viewLifecycleOwner, Observer { if (savedInstanceState == null) { onTasksDataObtained(it) } })
+        observe(taskViewModel::getAllTasksData)
+        { if (savedInstanceState == null) onTasksDataObtained(it) }
 
-        taskViewModel.getFilteredTasksData().observe(viewLifecycleOwner, Observer { onTasksDataObtained(it) })
-
-        taskViewModel.getTaskInteractEvent().observe(viewLifecycleOwner, Observer { onTaskInteraction(it) })
+        observe(taskViewModel::getFilteredTasksData, ::onTasksDataObtained)
+        observe(taskViewModel::getTaskInteractEvent, ::onTaskInteraction)
     }
 
-    private fun onCurrentTaskBundleSet(taskList: TaskList) {
-        taskBundleView.setTaskBundle(taskList)
-        taskViewModel.setProgressAndFetchAllTasks(taskList)
+    private fun onCurrentTaskBundleSet(taskCollection: TaskCollection) {
+        taskBundleView.setTaskBundle(taskCollection)
+        taskViewModel.setProgressAndFetchAllTasks(taskCollection)
     }
 
     /**
      * Display Updated Progress
      */
 
-    private fun onTaskListProgressChanged(resource: Resource<Float>) {
-        resource.inspect({
-            taskBundleView.updateProgress(it.toInt())
-        })
+    private fun onTaskCollectionProgressChanged(resource: Resource<Float>) {
+        resource
+            .inspectFor<Resource.Success<Float>> {
+                taskBundleView.updateProgress(it.successData.toInt())
+            }
+            .inspectFor(::sendError)
     }
 
     /**
@@ -119,104 +117,92 @@ class TasksFragment : Fragment() {
         // TODO
     }
 
-    private fun filterTasks(taskCompletion: Task.TaskCompletion) {
-        taskViewModel.filterTasksByCompletion(taskCompletion)
-    }
+    private fun filterTasks(taskCompletion: Task.TaskCompletion)
+            = taskViewModel.filterTasksByCompletion(taskCompletion)
 
     /**
-     * Show Task Interaction Dialogs
+     * On Task Action
      */
 
-    private fun onCompleteTaskAction(task: Task, position: Int) {
-        if (task.isCompleted) {
-            undoTaskComplete(task, position)
-        } else {
-            completeTask(task, position)
+    private fun completeTask(task: Task, position: Int)
+            = taskViewModel.completeTask(task, true, position)
+
+    private fun undoTaskComplete(task: Task, position: Int)
+            = taskViewModel.undoTaskComplete(task, position)
+
+    private fun deleteTask(task: Task, position: Int)
+            = taskViewModel.deleteTask(task, position)
+
+    private fun undoTaskDelete()
+            = taskViewModel.getTaskInteractEvent().currentValue {
+        it.inspectFor<TaskDeleted> {taskDeleted ->
+            mainViewModel.undoDeleteTask(taskDeleted.task, taskDeleted.successData)
         }
     }
 
-    private fun completeTask(task: Task, position: Int) = taskViewModel.completeTask(task, true, position)
-
-    private fun deleteTask(task: Task, position: Int) = taskViewModel.deleteTask(task, position)
-
-    /**
-     * Inspect Task Interaction Result
-     */
-
     private fun onTaskInteraction(resource: Resource<Int>) {
-        resource.inspectFor<TaskCompleted, TaskUndoCompleted, TaskDeleted>({
-            onTaskCompleted(it.task, it.successData)
-        },{
-            onTaskUndoCompleted(it.task, it.successData)
-        }, {
-            onTaskDeleted(it.task, it.successData)
-        })
+        resource
+            .inspectFor<TaskCompleted> { onTaskCompleted(it.task, it.successData) }
+            .inspectFor<TaskUndoCompleted> { onTaskUndoCompleted(it.task, it.successData) }
+            .inspectFor<TaskDeleted> { onTaskDeleted(it.task, it.successData) }
+            .inspectFor<ErrorCompleted> { onTaskCompleteError( it)}
     }
 
-    /**
-     * Update User Interface once Task has been Completed
-     */
-
     private fun onTaskCompleted(task: Task, updatePosition: Int) {
-        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_COMPLETED)
+//        taskViewModel.updateTaskCollectionProgress(task,
+//                UpdateProgressInteractor.TaskAction.TASK_COMPLETED)
+
         taskAdapter.updateTaskCompleted(updatePosition, taskViewModel.getTaskCompletion())
     }
 
     private fun onTaskUndoCompleted(task: Task, updatePosition: Int) {
-        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED)
+//        taskViewModel.updateTaskCollectionProgress(task,
+//            UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED)
+
         taskAdapter.updateTaskUndoCompleted(task, updatePosition, taskViewModel.getTaskCompletion())
     }
 
-    /**
-     * Update User Interface once Task has been Deleted
-     */
+    private fun onTaskCompleteError(errorCompleted: ErrorCompleted) {
+        taskAdapter.notifyItemChanged(errorCompleted.updatePosition)
+        sendError(errorCompleted)
+    }
 
     private fun onTaskDeleted(task: Task, updatePosition: Int) {
-        taskViewModel.updateTaskListProgress(task, UpdateProgressInteractor.TaskAction.TASK_DELETED)
+//        taskViewModel.updateTaskCollectionProgress(task,
+//            UpdateProgressInteractor.TaskAction.TASK_DELETED)
         taskAdapter.updateTaskDeleted(updatePosition)
         showUndoDeleteSnackBar(task)
     }
 
-    /**
-     * Show Undo SnackBar for reversing task interaction
-     */
-
-    private fun showUndoCompleteSnackBar(task: Task) {
-//       showUndoSnackBar(task.text, resources.getString(R.string.undo_complete_action), this::undoTaskComplete)
+    private fun onTaskSaved(resource: Resource<Task>) {
+        resource.inspectFor<TaskSaved> {
+            mainViewModel.disableSaveTaskEvent()
+            taskViewModel.updateTaskCollectionProgress(it.successData, UpdateProgressInteractor.TaskAction.TASK_SAVED)
+            taskAdapter.updateTaskSaved(it.successData, it.updatePosition)
+        }
     }
 
     private fun showUndoDeleteSnackBar(task: Task) {
         showUndoSnackBar(task.text, resources.getString(R.string.undo_delete_action), this::undoTaskDelete)
     }
 
-    private fun undoTaskComplete(task: Task, position: Int) {
-        taskViewModel.undoTaskComplete(task, position)
-    }
-
-    private fun undoTaskDelete() {
-        taskViewModel.getTaskInteractEvent().value?.inspectFor<TaskDeleted> {
-            mainViewModel.undoDeleteTask(it.task, it.successData)
-        }
-    }
-
     /**
      * Update User Interface once Task has been Saved
      */
 
-    private fun onTaskSaved(resource: Resource<Task>) {
-        resource.inspectFor<TaskSaved> {
-            mainViewModel.disableSaveTaskEvent()
-            taskViewModel.updateTaskListProgress(it.successData, UpdateProgressInteractor.TaskAction.TASK_SAVED)
-            taskAdapter.updateTaskSaved(it.successData, it.updatePosition)
-        }
-    }
+
 
     /**
      * Display Obtained and Filtered Tasks
      */
 
     private fun onTasksDataObtained(resource: Resource<List<Task>>?) {
-        resource?.inspect(::displayTasks, ::displayLoading, ::displayEmptyState, ::sendError)
+        resource?.apply {
+            inspectFor<Resource.Success<List<Task>>> { displayTasks(it.successData) }
+            inspectFor<Resource.Pending> { displayLoading(it.pendingMessage) }
+            inspectFor<Resource.Failure> { displayEmptyState(it) }
+            inspectFor<Error> { sendError(it) }
+        }
     }
 
     private fun displayTasks(list: List<Task>) {
@@ -234,12 +220,10 @@ class TasksFragment : Fragment() {
      */
 
     private fun displayEmptyState(failure: Resource.Failure) {
-        when (failure) {
-            is AllCompleted -> displayAllCompletedEmptyState()
-            is NothingToShow ->{
-                taskRecyclerView.visibility = View.GONE
-            }
-            is NoCompleted -> displayNoCompletedEmptyState()
+        failure.apply {
+            inspectFor<AllCompleted> { displayAllCompletedEmptyState() }
+            inspectFor<NothingToShow> { taskRecyclerView.visibility = View.GONE }
+            inspectFor<NoCompleted> { displayNoCompletedEmptyState() }
         }
     }
 

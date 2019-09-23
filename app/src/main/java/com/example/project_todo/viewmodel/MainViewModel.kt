@@ -9,36 +9,37 @@ import com.example.project_todo.domain.tasklists.GetTaskListsInteractor
 import com.example.project_todo.domain.tasks.storage.SaveTaskInteractor
 import com.example.project_todo.entity.Resource
 import com.example.project_todo.entity.Task
-import com.example.project_todo.entity.TaskList
+import com.example.project_todo.entity.TaskCollection
+import com.example.project_todo.currentValue
+import com.example.project_todo.entity.Error
+import com.example.project_todo.event.AdvancedLiveEvent
+import com.example.project_todo.event.SingleLiveEvent
 
 class MainViewModel(private val taskListRepository: TaskListRepository,
                     private val taskRepository: TaskRepository): BaseViewModel<List<Task>>() {
 
     private val saveTaskEvent = LiveEvent<Task>()
 
-    private val allTaskListsData = MediatorLiveData<Resource<List<TaskList>>>()
-    private val currentTaskListData = MediatorLiveData<TaskList>()
-    private val errorLiveData = MediatorLiveData<Throwable>()
+    private val allTaskListsData = MediatorLiveData<Resource<List<TaskCollection>>>()
+    private val currentTaskListData = MediatorLiveData<TaskCollection>()
+    private val errorLiveData = SingleLiveEvent<Throwable>()
 
-    init {
-        fetchAllTaskLists()
-    }
+    init { fetchAllTaskLists() }
 
     private fun fetchAllTaskLists() {
         executeUseCase(GetTaskListsInteractor(taskListRepository), allTaskListsData)
     }
 
-    fun setCurrentTaskList(taskList: TaskList) {
-        currentTaskListData.value = taskList
+    fun setCurrentTaskList(taskCollection: TaskCollection) {
+        currentTaskListData.value = taskCollection
     }
 
-    fun sendError(throwable: Throwable) {
-        errorLiveData.value = throwable
-    }
+    fun sendError(error: Error) { errorLiveData.value = error }
 
-    fun saveTask(text: String, description: String, dateString: String, priority: Int) {
-        currentTaskListData.value?.apply {
-            saveTask(Task(text, description, title, dateString, isCompleted = false, priority = priority))
+    fun saveTask(task: Task) {
+        currentTaskListData.currentValue {
+            task.taskCollectionTitle = it.title
+            saveTask(task,-1)
         }
     }
 
@@ -46,16 +47,14 @@ class MainViewModel(private val taskListRepository: TaskListRepository,
         saveTask(task, updatePosition)
     }
 
-
-    private fun saveTask(task: Task, updatePosition: Int = -1, onResult: () -> Unit = {}) {
-        executeUseCase(SaveTaskInteractor(task, updatePosition, taskRepository), saveTaskEvent, onResult)
+    private fun saveTask(task: Task, updatePosition: Int) {
+        executeUseCase(SaveTaskInteractor(task, updatePosition, taskRepository), saveTaskEvent)
     }
 
     fun disableSaveTaskEvent() = saveTaskEvent.persistAndDisable()
 
-    fun getSaveTaskLiveEvent(): LiveData<Resource.EventResource<Task>> = saveTaskEvent
-    fun getCurrentTaskListData(): LiveData<TaskList> = currentTaskListData
-    fun getTaskListsData(): LiveData<Resource<List<TaskList>>> = allTaskListsData
-    fun getErrorData(): LiveData<Throwable> = errorLiveData
-
+    fun getSaveTaskLiveEvent(): LiveData<Resource<Task>> = saveTaskEvent
+    fun getCurrentTaskListData(): LiveData<TaskCollection> = currentTaskListData
+    fun getTaskListsData(): LiveData<Resource<List<TaskCollection>>> = allTaskListsData
+    fun getErrorData(): LiveData<Resource<Throwable>> = errorLiveData
 }

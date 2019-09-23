@@ -1,6 +1,6 @@
 package com.example.project_todo.entity
 
-data class Error(val throwable: Throwable): Resource.Failure()
+open class Error(val throwable: Throwable): Resource.Failure()
 
 /**
  * Failure Resources
@@ -14,14 +14,16 @@ class NoCompleted: Resource.Failure()
 
 class NothingToShow: Resource.Failure()
 
+class ErrorCompleted(val updatePosition: Int, throwable: Throwable): Error(throwable)
+
 /**
  * Success Resources
  */
 
-class TaskSaved(task: Task, var updatePosition: Int = -1): Resource.EventResource<Task>(task)
+class TaskSaved(task: Task, var updatePosition: Int = -1): Resource.Success<Task>(task)
 
-class TaskCompleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)
+class TaskCompleted(val task: Task, updatePosition: Int): Resource.Success<Int>(updatePosition)
 
-class TaskUndoCompleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)
+class TaskUndoCompleted(val task: Task, updatePosition: Int): Resource.Success<Int>(updatePosition)
 
-class TaskDeleted(val task: Task, updatePosition: Int): Resource.EventResource<Int>(updatePosition)
+class TaskDeleted(val task: Task, updatePosition: Int): Resource.Success<Int>(updatePosition)

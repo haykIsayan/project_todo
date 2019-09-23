@@ -1,22 +1,22 @@
 package com.example.project_todo.core
 
-import com.example.project_todo.dummieTaskList
-import com.example.project_todo.entity.TaskList
+import com.example.project_todo.myTasksCollection
+import com.example.project_todo.entity.TaskCollection
 
 object TaskListTempDatabase {
 
-    private val sTaskLists = mutableListOf(dummieTaskList)
+    private val sTaskLists = mutableListOf(myTasksCollection)
 
-    fun getTaskLists(): List<TaskList> = sTaskLists
+    fun getTaskLists(): List<TaskCollection> = sTaskLists
 
-    fun updateTaskList(taskList: TaskList) {
+    fun updateTaskList(taskCollection: TaskCollection) {
         sTaskLists.apply {
-            set(indexOf(taskList), taskList)
+            set(indexOf(taskCollection), taskCollection)
         }
     }
 
-    fun addTaskList(taskList: TaskList) {
-        sTaskLists.add(taskList)
+    fun addTaskList(taskCollection: TaskCollection) {
+        sTaskLists.add(taskCollection)
     }
 
 }

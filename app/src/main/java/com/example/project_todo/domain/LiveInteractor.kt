@@ -15,13 +15,19 @@ abstract class LiveInteractor<S>: LiveUseCase<S> {
 
     final override fun execute(): LiveData<Resource<S>> = MutableLiveData<Resource<S>>().apply {
         value = Resource.Pending("")
-        val asyncAction = GlobalScope.async(Dispatchers.IO) { obtainResource()}
-        GlobalScope.launch(Dispatchers.Main) { value = asyncAction.await() }
+        val asyncAction = GlobalScope.async(Dispatchers.IO) { fetchResource()}
+        GlobalScope.launch(Dispatchers.Main) { postValue(asyncAction.await()) }
     }
 
-    private suspend fun obtainResource() = try { onExecute() } catch (throwable: Throwable) { Error(throwable) }
+    private suspend fun fetchResource() = try {
+        onExecute()
+    } catch (throwable: Throwable) {
+        onError(throwable)
+    }
 
-    suspend fun test(): LiveData<Resource<S>> = MutableLiveData<Resource<S>>().apply { value = onExecute() }
+    suspend fun test(): LiveData<Resource<S>> = MutableLiveData<Resource<S>>().apply { value = fetchResource() }
 
-    abstract suspend fun onExecute(): Resource<S>
+    protected abstract suspend fun onExecute(): Resource<S>
+
+    protected open fun onError(throwable: Throwable) = Error(throwable)
 }

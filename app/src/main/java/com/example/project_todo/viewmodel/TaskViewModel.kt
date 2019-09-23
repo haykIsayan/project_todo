@@ -2,9 +2,10 @@ package com.example.project_todo.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import com.example.project_todo.event.PersistentLiveEvent
+import com.example.project_todo.event.AdvancedLiveEvent
 import com.example.project_todo.core.TaskListRepository
 import com.example.project_todo.core.TaskRepository
+import com.example.project_todo.currentValue
 import com.example.project_todo.domain.tasks.storage.CompleteTaskInteractor
 import com.example.project_todo.domain.tasks.storage.GetAllTasksInteractor
 import com.example.project_todo.domain.tasklists.UpdateProgressInteractor
@@ -15,22 +16,22 @@ import com.example.project_todo.entity.*
 class TaskViewModel(private val taskRepository: TaskRepository,
                     private val taskListRepository: TaskListRepository): BaseViewModel<List<Task>>() {
 
-    private var currentTaskList: TaskList? = null
+    private var currentTaskCollection: TaskCollection? = null
     private val taskListProgressData = MediatorLiveData<Resource<Float>>()
 
     private val allTasksData = MediatorLiveData<Resource<List<Task>>>()
 
     private val filteredTasksData = MediatorLiveData<Resource<List<Task>>>()
 
-    private val taskInteractEvent = PersistentLiveEvent<Int>()
+    private val taskInteractEvent = AdvancedLiveEvent<Int>()
 
     private val taskFilter = TaskFilter()
 
-    private var isUndoModeActive = false
-
-    fun setProgressAndFetchAllTasks(taskList: TaskList) {
-        if (currentTaskList == null || (currentTaskList != null && currentTaskList?.title == taskList.title)) {
-            currentTaskList = taskList
+    fun setProgressAndFetchAllTasks(taskCollection: TaskCollection) {
+        if (currentTaskCollection == null ||
+            (currentTaskCollection != null
+                    && currentTaskCollection?.title == taskCollection.title)) {
+            currentTaskCollection = taskCollection
             fetchAllTasks()
         }
     }
@@ -40,7 +41,7 @@ class TaskViewModel(private val taskRepository: TaskRepository,
      */
 
     private fun fetchAllTasks() {
-        currentTaskList?.apply {
+        currentTaskCollection?.apply {
             taskListProgressData.value = Resource.Success(getProgression())
             executeUseCase(GetAllTasksInteractor(title, taskRepository), allTasksData)
         }
@@ -50,10 +51,12 @@ class TaskViewModel(private val taskRepository: TaskRepository,
      * Update Task list progression after Task interaction
      */
 
-    fun updateTaskListProgress(task: Task, taskAction: UpdateProgressInteractor.TaskAction) {
-        currentTaskList?.apply {
+    fun updateTaskCollectionProgress(task: Task, taskAction: UpdateProgressInteractor.TaskAction,
+                                     onProgressUpdated: () -> Unit = {}) {
+        currentTaskCollection?.apply {
             executeUseCase(
-                UpdateProgressInteractor(task, taskAction, this, taskListRepository), taskListProgressData)
+                UpdateProgressInteractor(task, taskAction, this, taskListRepository),
+                taskListProgressData, onProgressUpdated)
         }
     }
 
@@ -61,16 +64,21 @@ class TaskViewModel(private val taskRepository: TaskRepository,
      * Task interaction: Complete the given Task and save updatePosition for subsequent update of the RecyclerView
      */
 
-    fun completeTask(task: Task, completeTask: Boolean, updatePosition: Int) {
-        executeUseCase(CompleteTaskInteractor(task, completeTask, updatePosition, taskRepository), taskInteractEvent)
+    fun completeTask(task: Task, completeTask: Boolean, position: Int) {
+//        executeUseCase(
+//            CompleteTaskInteractor(task, completeTask, updatePosition, taskRepository), taskInteractEvent)
+
+        executeTaskAction(task, position, UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED)
     }
 
     /**
      * Task interaction: Delete the given Task and save updatePosition for subsequent update of the RecyclerView
      */
 
-    fun deleteTask(task: Task, updatePosition: Int) {
-        executeUseCase(DeleteTaskInteractor(task, updatePosition, taskRepository), taskInteractEvent)
+    fun deleteTask(task: Task, position: Int) {
+//        executeUseCase(DeleteTaskInteractor(task, updatePosition, taskRepository),
+//            taskInteractEvent)
+        executeTaskAction(task, position, UpdateProgressInteractor.TaskAction.TASK_DELETED)
     }
 
     /**
@@ -78,22 +86,38 @@ class TaskViewModel(private val taskRepository: TaskRepository,
      */
 
     fun undoTaskComplete(task: Task, position: Int) {
-//        taskInteractEvent.value?.apply {
-//            inspectFor<TaskCompleted> {
-                executeUseCase(
-                        CompleteTaskInteractor(task, false, position, taskRepository),
-                        taskInteractEvent, taskInteractEvent::persistAndDisable)
-//            }
-//        }
-
+//         executeUseCase(CompleteTaskInteractor(task, false, position, taskRepository),
+//             taskInteractEvent)
+        executeTaskAction(task, position, UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED)
     }
 
 
-    fun undoTaskInteraction() = taskInteractEvent.complete()
+    private fun executeTaskAction(task: Task,
+                                  position: Int,
+                                  action: UpdateProgressInteractor.TaskAction) {
+        updateTaskCollectionProgress(task, action) {
+            when (action) {
+                UpdateProgressInteractor.TaskAction.TASK_COMPLETED -> {
+                    executeUseCase(CompleteTaskInteractor(task, true, position,
+                            taskRepository),
+                        taskInteractEvent)
+                }
+                UpdateProgressInteractor.TaskAction.TASK_UNDO_COMPLETED -> {
+                    executeUseCase(CompleteTaskInteractor(task, false, position,
+                        taskRepository),
+                        taskInteractEvent)
+                }
+                UpdateProgressInteractor.TaskAction.TASK_DELETED -> {
+                    executeUseCase(DeleteTaskInteractor(task, position, taskRepository),
+                        taskInteractEvent)
+                }
+                UpdateProgressInteractor.TaskAction.TASK_SAVED -> {
 
-    fun setUndoModeActive(undoModeActive: Boolean) {
-        isUndoModeActive = undoModeActive
+                }
+            }
+        }
     }
+
 
     /**
      * Task Filtering
@@ -101,23 +125,28 @@ class TaskViewModel(private val taskRepository: TaskRepository,
 
     fun filterTasksByCompletion(taskCompletion: Task.TaskCompletion) {
         taskFilter.taskCompletion = taskCompletion
-        allTasksData.value?.inspect({
-            executeUseCase(FilterTasksInteractor(it, taskFilter), filteredTasksData)
-        })
+
+        allTasksData.currentValue {
+            it.inspectForSuccess {taskList ->
+                executeUseCase(FilterTasksInteractor(taskList, taskFilter), filteredTasksData)
+            }
+        }
     }
 
     fun filterTasksByPriority(priority: Int) {
         taskFilter.priority = priority
-        allTasksData.value?.inspect({
-            executeUseCase(FilterTasksInteractor(it, taskFilter), filteredTasksData)
-        })
+        allTasksData.currentValue {
+            it.inspectForSuccess {taskList ->
+                executeUseCase(FilterTasksInteractor(taskList, taskFilter), filteredTasksData)
+            }
+        }
     }
 
     fun getTaskFilter(): TaskFilter = taskFilter
     fun getTaskCompletion(): Task.TaskCompletion = taskFilter.taskCompletion
 
-    fun getTaskListProgressData(): LiveData<Resource<Float>> = taskListProgressData
+    fun getTaskCollectionProgressData(): LiveData<Resource<Float>> = taskListProgressData
     fun getAllTasksData(): LiveData<Resource<List<Task>>> = allTasksData
     fun getFilteredTasksData(): LiveData<Resource<List<Task>>> = filteredTasksData
-    fun getTaskInteractEvent(): LiveData<Resource.EventResource<Int>> = taskInteractEvent
+    fun getTaskInteractEvent(): LiveData<Resource<Int>> = taskInteractEvent
 }

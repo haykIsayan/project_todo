@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_task_description_layout_task_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:background="@null"
+            android:layout_marginTop="10dp"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginBottom="10dp"
+            android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_attachments_layout_task_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="15dp"
+            android:background="@android:color/white"
+            android:visibility="gone"/>
+
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/mb_priority_layout_task_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                app:cornerRadius="10dp"
+                app:rippleColor="@android:color/white"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginStart="15dp"
+                android:visibility="gone"
+                android:enabled="false"
+                android:backgroundTint="@android:color/darker_gray"
+                android:text="Mid Priority"/>
+
+        <com.google.android.material.button.MaterialButton
+                android:id="@+id/mb_creation_layout_task_detail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                app:cornerRadius="10dp"
+                android:textColor="@android:color/white"
+                android:padding="10dp"
+                android:layout_marginStart="5dp"
+                android:visibility="gone"
+                android:enabled="false"
+                android:backgroundTint="@android:color/darker_gray"
+                android:text="Created on: June 27, 1998 - 16:35 PM CTD"/>
+
+        <!--<com.google.android.material.button.MaterialButton-->
+                <!--android:id="@+id/mb_deadline_layout_task_detail"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:textSize="12sp"-->
+                <!--app:cornerRadius="10dp"-->
+                <!--android:textColor="@android:color/white"-->
+                <!--android:padding="10dp"-->
+                <!--android:layout_marginStart="5dp"-->
+                <!--android:visibility="gone"-->
+                <!--android:enabled="false"-->
+                <!--android:backgroundTint="@android:color/darker_gray"-->
+                <!--android:text="Due: June 27, 1998 - 16:35 PM CTD"/>-->
+
+    </LinearLayout>
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/mb_deadline_layout_task_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            app:cornerRadius="10dp"
+            app:iconTint="@android:color/white"
+            app:iconSize="12dp"
+            android:textColor="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginStart="15dp"
+            android:visibility="gone"
+            android:enabled="false"
+            android:backgroundTint="@android:color/darker_gray"
+            android:text="Due: June 27, 1998 - 16:35 PM CTD"/>
+
+    <!--<com.google.android.material.button.MaterialButton-->
+            <!--android:id="@+id/mb_creation_layout_task_detail"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:textSize="12sp"-->
+            <!--app:cornerRadius="10dp"-->
+            <!--android:textColor="@android:color/white"-->
+            <!--android:padding="10dp"-->
+            <!--android:layout_marginStart="15dp"-->
+            <!--android:visibility="gone"-->
+            <!--android:enabled="false"-->
+            <!--android:backgroundTint="@android:color/darker_gray"-->
+            <!--android:text="Created on: June 27, 1998 - 16:35 PM CTD"/>-->
+
+</LinearLayout>

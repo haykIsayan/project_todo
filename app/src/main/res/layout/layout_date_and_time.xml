@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+
+    <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+    />
+
+    <CalendarView
+            android:id="@+id/cv_calendar_layout_date_and_time"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"/>
+
+    <TimePicker
+            android:id="@+id/tp_time_spinner_layout_date_and_time"
+            android:layout_width="match_parent"
+            android:layout_height="250dp"
+            android:layout_marginTop="50dp"
+            android:timePickerMode="spinner"
+            android:visibility="gone"/>
+
+    <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tl_calendar_type_layout_date_and_type"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp">
+
+        <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/ic_action_deadline"/>
+
+        <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:icon="@drawable/ic_action_reminder"/>
+
+    </com.google.android.material.tabs.TabLayout>
+
+
+    <com.google.android.material.button.MaterialButton
+            android:id="@+id/mb_set_deadline_layout_date_and_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Set Deadline"
+            android:textColor="@android:color/white"
+            android:textAlignment="center"
+            android:padding="10dp"
+            app:rippleColor="@android:color/white"
+            app:cornerRadius="10dp"
+            android:backgroundTint="@android:color/black"
+            android:layout_margin="10dp"/>
+
+</LinearLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:backgroundTint="@android:color/white"
+              android:background="@drawable/layout_snackbar_background">
+
+    <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/mtv_priority_layout_change_priority"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAlignment="center"
+            android:textColor="@android:color/black"
+            android:textSize="20sp"/>
+
+    <SeekBar
+            android:id="@+id/sb_priority_layout_change_priority"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:thumbTint="@android:color/black"
+            android:progressTint="@android:color/black"
+            android:max="2"
+            android:progress="2"/>
+
+</LinearLayout>
